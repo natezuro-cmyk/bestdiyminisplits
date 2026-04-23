@@ -15,12 +15,14 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
-# CSS and JS — long cache, they're content-addressed in effect
+# CSS and JS — short cache. Filenames aren't content-hashed, so long-cache
+# would serve stale code to returning visitors after a deploy. Revalidate
+# every hour; browsers still get 304s when nothing changed.
 /*.css
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=3600, must-revalidate
 
 /*.js
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=3600, must-revalidate
 
 # Images — long cache
 /*.svg
