@@ -63,12 +63,14 @@
     '1.2': { r: 22, opacity: 0.95, rays: 10, label: 'full sun' }
   };
   // What shows through the window based on climate zone
+  // Each climate uses a named gradient (defined in the SVG <defs>) plus a
+  // horizon/silhouette drawn at the bottom of the window.
   const climateWindow = {
-    hot:   { bg: '#f5c69f', scene: 'palm',     label: 'palms' },
-    warm:  { bg: '#e8cb82', scene: 'cactus',   label: 'desert' },
-    mixed: { bg: '#c8dcec', scene: 'tree',     label: 'oak tree' },
-    cool:  { bg: '#b6c6d2', scene: 'pine',     label: 'evergreen' },
-    cold:  { bg: '#d8e5ec', scene: 'snowpine', label: 'snow' }
+    hot:   { fill: 'url(#skyHot)',   scene: 'cactus', label: 'sunset / cactus' },
+    warm:  { fill: 'url(#skyWarm)',  scene: 'mesa',   label: 'desert mesa' },
+    mixed: { fill: 'url(#skyMixed)', scene: 'hills',  label: 'rolling hills' },
+    cool:  { fill: 'url(#skyCool)',  scene: 'pines',  label: 'pine forest' },
+    cold:  { fill: 'url(#skyCold)',  scene: 'snow',   label: 'snow + flurries' }
   };
 
   function getFormValues() {
@@ -118,100 +120,144 @@
     return el;
   }
 
-  // Silhouettes shown through the window — change with climate
+  // Silhouettes shown through the window — horizon + scene per climate.
+  // All silhouettes sit at the bottom; the sky gradient shows above.
   function drawWindowScene(group, w, h, scene) {
     clearChildren(group);
-    if (scene === 'palm') {
-      const tx = w * 0.72, top = h * 0.4;
+
+    if (scene === 'cactus') {
+      // Dark ground / horizon
       group.appendChild(mk('path', {
-        d: 'M ' + tx + ' ' + (h * 0.95) + ' Q ' + (tx + 4) + ' ' + (h * 0.7) + ' ' + (tx - 1) + ' ' + top,
-        stroke: '#6b4423', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round'
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.82) +
+           ' Q ' + (w * 0.3) + ' ' + (h * 0.78) +
+           ' '  + (w * 0.55) + ' ' + (h * 0.8) +
+           ' Q ' + (w * 0.8) + ' ' + (h * 0.83) +
+           ' '  + w + ' ' + (h * 0.78) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#5a2410', opacity: 0.92
       }));
-      ['q -14 -2 -24 4', 'q -12 -8 -18 -14', 'q 0 -14 4 -22', 'q 14 -6 20 -12', 'q 16 6 22 0']
-        .forEach(q => group.appendChild(mk('path', {
-          d: 'M ' + tx + ' ' + top + ' ' + q,
-          stroke: '#2d5a3d', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round'
-        })));
-    }
-    else if (scene === 'cactus') {
-      const cx = w * 0.28, cw = w * 0.13;
-      const top = h * 0.32, bot = h * 0.95;
+      // Saguaro silhouette
+      const cx = w * 0.68, cw = Math.max(4, w * 0.08);
+      const top = h * 0.36, bot = h * 0.8;
       group.appendChild(mk('rect', {
         x: cx - cw / 2, y: top, width: cw, height: bot - top, rx: cw / 2,
-        fill: '#5a7d4f', stroke: '#3a5d2f', 'stroke-width': 0.7
+        fill: '#1a0810'
       }));
-      const armY = top + (bot - top) * 0.4;
-      const armH = (bot - top) * 0.38;
+      // Right arm (larger)
+      const armRW = w * 0.09, armRH = h * 0.16, armRT = cw * 0.75;
+      const armRBY = h * 0.58;
       group.appendChild(mk('path', {
-        d: 'M ' + (cx + cw / 2 - 0.3) + ' ' + armY +
-           ' h ' + (w * 0.1) +
-           ' v -' + armH +
-           ' a 3 3 0 0 1 3 -3' +
-           ' h ' + (cw * 0.55) +
-           ' a 3 3 0 0 1 3 3' +
-           ' v ' + (armH + cw * 0.5) +
-           ' h -' + (w * 0.1 + cw * 0.55) + ' Z',
-        fill: '#5a7d4f', stroke: '#3a5d2f', 'stroke-width': 0.7
+        d: 'M ' + (cx + cw / 2 - 0.3) + ' ' + armRBY +
+           ' h ' + armRW +
+           ' v -' + armRH +
+           ' a ' + (armRT / 2) + ' ' + (armRT / 2) + ' 0 0 1 ' + armRT + ' 0' +
+           ' v ' + (armRH + armRT) +
+           ' h -' + (armRW + armRT) + ' Z',
+        fill: '#1a0810'
+      }));
+      // Left arm (smaller)
+      const armLW = w * 0.07, armLH = h * 0.12, armLT = cw * 0.65;
+      const armLBY = h * 0.62;
+      group.appendChild(mk('path', {
+        d: 'M ' + (cx - cw / 2 + 0.3) + ' ' + armLBY +
+           ' h -' + armLW +
+           ' v -' + armLH +
+           ' a ' + (armLT / 2) + ' ' + (armLT / 2) + ' 0 0 0 -' + armLT + ' 0' +
+           ' v ' + (armLH + armLT) +
+           ' h ' + (armLW + armLT) + ' Z',
+        fill: '#1a0810'
       }));
     }
-    else if (scene === 'tree') {
-      const tx = w * 0.5;
-      group.appendChild(mk('rect', {
-        x: tx - 2, y: h * 0.6, width: 4, height: h * 0.35, fill: '#6b4423'
-      }));
-      group.appendChild(mk('circle', {
-        cx: tx, cy: h * 0.5, r: h * 0.26, fill: '#4a7a4e', stroke: '#2d5a3d', 'stroke-width': 0.6
-      }));
-      group.appendChild(mk('circle', {
-        cx: tx - h * 0.16, cy: h * 0.48, r: h * 0.16, fill: '#4a7a4e', stroke: '#2d5a3d', 'stroke-width': 0.6
-      }));
-      group.appendChild(mk('circle', {
-        cx: tx + h * 0.16, cy: h * 0.53, r: h * 0.15, fill: '#4a7a4e', stroke: '#2d5a3d', 'stroke-width': 0.6
+
+    else if (scene === 'mesa') {
+      // Desert mesa — flat-topped mountain silhouette
+      group.appendChild(mk('path', {
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.82) +
+           ' L ' + (w * 0.3) + ' ' + (h * 0.82) +
+           ' L ' + (w * 0.36) + ' ' + (h * 0.55) +
+           ' L ' + (w * 0.62) + ' ' + (h * 0.55) +
+           ' L ' + (w * 0.68) + ' ' + (h * 0.82) +
+           ' L ' + w + ' ' + (h * 0.82) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#6f3512', opacity: 0.92
       }));
     }
-    else if (scene === 'pine') {
-      const tx = w * 0.55;
-      const top = h * 0.18, bot = h * 0.88;
-      group.appendChild(mk('rect', {
-        x: tx - 2, y: bot, width: 4, height: h * 0.08, fill: '#4a2e1a'
-      }));
+
+    else if (scene === 'hills') {
+      // Back hills (lighter)
       group.appendChild(mk('path', {
-        d: 'M ' + tx + ' ' + top +
-           ' L ' + (tx - w * 0.17) + ' ' + bot +
-           ' L ' + (tx + w * 0.17) + ' ' + bot + ' Z',
-        fill: '#2d4a2f', stroke: '#1a3320', 'stroke-width': 0.6
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.68) +
+           ' Q ' + (w * 0.25) + ' ' + (h * 0.58) +
+           ' '  + (w * 0.5)  + ' ' + (h * 0.65) +
+           ' Q ' + (w * 0.75) + ' ' + (h * 0.72) +
+           ' '  + w + ' ' + (h * 0.6) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#3d6b3e', opacity: 0.75
+      }));
+      // Front hills (darker)
+      group.appendChild(mk('path', {
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.8) +
+           ' Q ' + (w * 0.3) + ' ' + (h * 0.76) +
+           ' '  + (w * 0.55) + ' ' + (h * 0.82) +
+           ' Q ' + (w * 0.8) + ' ' + (h * 0.88) +
+           ' '  + w + ' ' + (h * 0.8) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#2d4a2f', opacity: 0.92
       }));
     }
-    else if (scene === 'snowpine') {
-      const tx = w * 0.55;
-      const top = h * 0.22, bot = h * 0.88;
-      group.appendChild(mk('rect', {
-        x: tx - 2, y: bot, width: 4, height: h * 0.08, fill: '#3a241a'
-      }));
-      group.appendChild(mk('path', {
-        d: 'M ' + tx + ' ' + top +
-           ' L ' + (tx - w * 0.17) + ' ' + bot +
-           ' L ' + (tx + w * 0.17) + ' ' + bot + ' Z',
-        fill: '#264530', stroke: '#1a2820', 'stroke-width': 0.6
-      }));
-      // Snow cap near top of pine
-      group.appendChild(mk('path', {
-        d: 'M ' + tx + ' ' + top +
-           ' L ' + (tx - w * 0.055) + ' ' + (top + h * 0.14) +
-           ' L ' + (tx + w * 0.055) + ' ' + (top + h * 0.14) + ' Z',
-        fill: '#ffffff', opacity: 0.92
-      }));
-      // Snowflakes in the sky
+
+    else if (scene === 'pines') {
+      // Jagged pine-forest horizon
+      const ticks   = [0, 0.08, 0.18, 0.28, 0.38, 0.48, 0.58, 0.68, 0.78, 0.88, 1];
+      const valleys = [0.85, 0.78, 0.65, 0.74, 0.6, 0.78, 0.62, 0.72, 0.66, 0.8, 0.85];
+      let d = 'M 0 ' + h + ' L 0 ' + (h * valleys[0]);
+      for (let i = 1; i < ticks.length; i++) {
+        const xMid = (ticks[i] + ticks[i - 1]) / 2 * w;
+        const peakY = h * Math.min(valleys[i - 1], valleys[i]) * 0.78;
+        d += ' L ' + xMid + ' ' + peakY;
+        d += ' L ' + (w * ticks[i]) + ' ' + (h * valleys[i]);
+      }
+      d += ' L ' + w + ' ' + h + ' Z';
+      group.appendChild(mk('path', { d: d, fill: '#2d4a2f', opacity: 0.95 }));
+    }
+
+    else if (scene === 'snow') {
+      // Falling flakes
       const flakes = [
-        [w * 0.18, h * 0.2],
-        [w * 0.34, h * 0.36],
-        [w * 0.85, h * 0.3],
-        [w * 0.12, h * 0.55],
-        [w * 0.92, h * 0.58]
+        [0.16, 0.14], [0.38, 0.2], [0.58, 0.12], [0.82, 0.18],
+        [0.22, 0.36], [0.48, 0.32], [0.7, 0.38], [0.92, 0.3]
       ];
       flakes.forEach(function (pt) {
-        group.appendChild(mk('circle', { cx: pt[0], cy: pt[1], r: 1.4, fill: '#ffffff' }));
+        group.appendChild(mk('circle', {
+          cx: w * pt[0], cy: h * pt[1], r: 1.1, fill: '#ffffff'
+        }));
       });
+      // Snowy back hills (white)
+      group.appendChild(mk('path', {
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.72) +
+           ' Q ' + (w * 0.25) + ' ' + (h * 0.62) +
+           ' '  + (w * 0.5)  + ' ' + (h * 0.7) +
+           ' Q ' + (w * 0.75) + ' ' + (h * 0.78) +
+           ' '  + w + ' ' + (h * 0.66) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#ffffff', opacity: 0.92
+      }));
+      // Front ridge (cool gray)
+      group.appendChild(mk('path', {
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.82) +
+           ' Q ' + (w * 0.3) + ' ' + (h * 0.78) +
+           ' '  + (w * 0.55) + ' ' + (h * 0.84) +
+           ' Q ' + (w * 0.8) + ' ' + (h * 0.9) +
+           ' '  + w + ' ' + (h * 0.8) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#c8d4dc'
+      }));
     }
   }
 
@@ -303,7 +349,7 @@
     win.setAttribute('transform', 'translate(' + winX + ',' + winY + ')');
     const cw = climateWindow[v.climate] || climateWindow.mixed;
     setAttrs(win.querySelector('.win-frame'), {
-      width: winW, height: winH, fill: cw.bg
+      width: winW, height: winH, fill: cw.fill
     });
     // Climate scene (palm/cactus/tree/pine/snowpine) behind the mullions
     drawWindowScene(document.getElementById('windowScene'), winW, winH, cw.scene);
