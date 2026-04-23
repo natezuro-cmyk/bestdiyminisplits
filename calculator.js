@@ -66,11 +66,11 @@
   // Each climate uses a named gradient (defined in the SVG <defs>) plus a
   // horizon/silhouette drawn at the bottom of the window.
   const climateWindow = {
-    hot:   { fill: 'url(#skyHot)',   scene: 'cactus', label: 'sunset / cactus' },
-    warm:  { fill: 'url(#skyWarm)',  scene: 'mesa',   label: 'desert mesa' },
-    mixed: { fill: 'url(#skyMixed)', scene: 'hills',  label: 'rolling hills' },
-    cool:  { fill: 'url(#skyCool)',  scene: 'pines',  label: 'pine forest' },
-    cold:  { fill: 'url(#skyCold)',  scene: 'snow',   label: 'snow + flurries' }
+    hot:   { fill: 'url(#skyHot)',   scene: 'dunes', label: 'desert sunset' },
+    warm:  { fill: 'url(#skyWarm)',  scene: 'mesa',  label: 'desert mesa' },
+    mixed: { fill: 'url(#skyMixed)', scene: 'hills', label: 'rolling hills' },
+    cool:  { fill: 'url(#skyCool)',  scene: 'pines', label: 'pine forest' },
+    cold:  { fill: 'url(#skyCold)',  scene: 'snow',  label: 'snow + flurries' }
   };
 
   function getFormValues() {
@@ -125,48 +125,34 @@
   function drawWindowScene(group, w, h, scene) {
     clearChildren(group);
 
-    if (scene === 'cactus') {
-      // Dark ground / horizon
+    if (scene === 'dunes') {
+      // Setting sun disc — large, upper-right
+      const sunX = w * 0.68, sunY = h * 0.45, sunR = Math.max(8, h * 0.2);
+      group.appendChild(mk('circle', {
+        cx: sunX, cy: sunY, r: sunR,
+        fill: '#c2410c', opacity: 0.85
+      }));
+      // Back dunes (lighter, gentle wave)
       group.appendChild(mk('path', {
         d: 'M 0 ' + h +
-           ' L 0 ' + (h * 0.82) +
-           ' Q ' + (w * 0.3) + ' ' + (h * 0.78) +
-           ' '  + (w * 0.55) + ' ' + (h * 0.8) +
-           ' Q ' + (w * 0.8) + ' ' + (h * 0.83) +
-           ' '  + w + ' ' + (h * 0.78) +
+           ' L 0 ' + (h * 0.72) +
+           ' Q ' + (w * 0.25) + ' ' + (h * 0.66) +
+           ' '  + (w * 0.5)  + ' ' + (h * 0.72) +
+           ' Q ' + (w * 0.75) + ' ' + (h * 0.78) +
+           ' '  + w + ' ' + (h * 0.7) +
            ' L ' + w + ' ' + h + ' Z',
-        fill: '#5a2410', opacity: 0.92
+        fill: '#b86a30', opacity: 0.85
       }));
-      // Saguaro silhouette
-      const cx = w * 0.68, cw = Math.max(4, w * 0.08);
-      const top = h * 0.36, bot = h * 0.8;
-      group.appendChild(mk('rect', {
-        x: cx - cw / 2, y: top, width: cw, height: bot - top, rx: cw / 2,
-        fill: '#1a0810'
-      }));
-      // Right arm (larger)
-      const armRW = w * 0.09, armRH = h * 0.16, armRT = cw * 0.75;
-      const armRBY = h * 0.58;
+      // Front dunes (darker)
       group.appendChild(mk('path', {
-        d: 'M ' + (cx + cw / 2 - 0.3) + ' ' + armRBY +
-           ' h ' + armRW +
-           ' v -' + armRH +
-           ' a ' + (armRT / 2) + ' ' + (armRT / 2) + ' 0 0 1 ' + armRT + ' 0' +
-           ' v ' + (armRH + armRT) +
-           ' h -' + (armRW + armRT) + ' Z',
-        fill: '#1a0810'
-      }));
-      // Left arm (smaller)
-      const armLW = w * 0.07, armLH = h * 0.12, armLT = cw * 0.65;
-      const armLBY = h * 0.62;
-      group.appendChild(mk('path', {
-        d: 'M ' + (cx - cw / 2 + 0.3) + ' ' + armLBY +
-           ' h -' + armLW +
-           ' v -' + armLH +
-           ' a ' + (armLT / 2) + ' ' + (armLT / 2) + ' 0 0 0 -' + armLT + ' 0' +
-           ' v ' + (armLH + armLT) +
-           ' h ' + (armLW + armLT) + ' Z',
-        fill: '#1a0810'
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.84) +
+           ' Q ' + (w * 0.3) + ' ' + (h * 0.8) +
+           ' '  + (w * 0.55) + ' ' + (h * 0.86) +
+           ' Q ' + (w * 0.8) + ' ' + (h * 0.9) +
+           ' '  + w + ' ' + (h * 0.84) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#8a4a1f'
       }));
     }
 
@@ -211,18 +197,50 @@
     }
 
     else if (scene === 'pines') {
-      // Jagged pine-forest horizon
-      const ticks   = [0, 0.08, 0.18, 0.28, 0.38, 0.48, 0.58, 0.68, 0.78, 0.88, 1];
-      const valleys = [0.85, 0.78, 0.65, 0.74, 0.6, 0.78, 0.62, 0.72, 0.66, 0.8, 0.85];
-      let d = 'M 0 ' + h + ' L 0 ' + (h * valleys[0]);
-      for (let i = 1; i < ticks.length; i++) {
-        const xMid = (ticks[i] + ticks[i - 1]) / 2 * w;
-        const peakY = h * Math.min(valleys[i - 1], valleys[i]) * 0.78;
-        d += ' L ' + xMid + ' ' + peakY;
-        d += ' L ' + (w * ticks[i]) + ' ' + (h * valleys[i]);
-      }
-      d += ' L ' + w + ' ' + h + ' Z';
-      group.appendChild(mk('path', { d: d, fill: '#2d4a2f', opacity: 0.95 }));
+      // Layered depth: distant mountains → mid ridge → foreground pines.
+      // Distant mountain range (furthest, lightest, low-contrast)
+      group.appendChild(mk('path', {
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.62) +
+           ' L ' + (w * 0.17) + ' ' + (h * 0.46) +
+           ' L ' + (w * 0.33) + ' ' + (h * 0.56) +
+           ' L ' + (w * 0.5)  + ' ' + (h * 0.4) +
+           ' L ' + (w * 0.67) + ' ' + (h * 0.54) +
+           ' L ' + (w * 0.83) + ' ' + (h * 0.44) +
+           ' L ' + w + ' ' + (h * 0.56) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#6a7a82', opacity: 0.55
+      }));
+      // Mid ridge (rolling, medium contrast)
+      group.appendChild(mk('path', {
+        d: 'M 0 ' + h +
+           ' L 0 ' + (h * 0.72) +
+           ' Q ' + (w * 0.25) + ' ' + (h * 0.64) +
+           ' '  + (w * 0.5)  + ' ' + (h * 0.7) +
+           ' Q ' + (w * 0.75) + ' ' + (h * 0.76) +
+           ' '  + w + ' ' + (h * 0.66) +
+           ' L ' + w + ' ' + h + ' Z',
+        fill: '#3d5a44', opacity: 0.8
+      }));
+      // Foreground pines (darkest, closest)
+      const groundY = h * 0.9;
+      const pines = [
+        { x: 0.15, ph: 0.38, pw: 0.1  },
+        { x: 0.32, ph: 0.3,  pw: 0.08 },
+        { x: 0.68, ph: 0.35, pw: 0.09 },
+        { x: 0.87, ph: 0.26, pw: 0.07 }
+      ];
+      pines.forEach(function (p) {
+        const px = p.x * w;
+        const pineH = h * p.ph;
+        const pineW = w * p.pw;
+        group.appendChild(mk('path', {
+          d: 'M ' + px + ' ' + (groundY - pineH) +
+             ' L ' + (px - pineW / 2) + ' ' + groundY +
+             ' L ' + (px + pineW / 2) + ' ' + groundY + ' Z',
+          fill: '#1a3320'
+        }));
+      });
     }
 
     else if (scene === 'snow') {
