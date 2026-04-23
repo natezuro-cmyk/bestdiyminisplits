@@ -78,7 +78,7 @@ npx wrangler d1 execute bdms-subscribers --file=db/your-file.sql --remote
 - [x] Privacy policy finalized (no placeholder provider text)
 - [x] `/checklist` printable page (the promised subscriber PDF)
 - [x] Self-hosted pageview analytics (no GA4, no cookies)
+- [x] `/about` — editorial-voice, no personal byline (see editorial principles there)
 - [ ] Google Search Console verification + sitemap submission
-- [ ] `/about.html` personalized with real name, photo, credentials
 - [ ] Affiliate program signups (Amazon, Home Depot, Lowe's) + real affiliate URLs in buyer's guide
 - [ ] Smoke test on an actual phone
