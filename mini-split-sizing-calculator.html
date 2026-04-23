@@ -143,11 +143,6 @@
                 </select>
               </div>
               <div class="form-field">
-                <label for="occupants">Regular occupants</label>
-                <input type="number" id="occupants" min="0" max="20" value="2" />
-                <span class="hint">People normally in the room</span>
-              </div>
-              <div class="form-field">
                 <label for="roomtype">Room type</label>
                 <select id="roomtype">
                   <option value="0">Bedroom / office</option>
@@ -157,20 +152,12 @@
                   <option value="0">Garage / workshop</option>
                 </select>
               </div>
-              <div class="form-field">
-                <label for="floor">Floor</label>
-                <select id="floor">
-                  <option value="1.0" selected>Middle floor / slab</option>
-                  <option value="1.1">Top floor (hot attic above)</option>
-                  <option value="0.95">Basement</option>
-                </select>
-              </div>
             </div>
           </form>
 
           <figure class="room-diagram">
             <svg id="roomSvg" viewBox="0 0 500 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="roomCaption">
-              <text x="16" y="20" font-family="JetBrains Mono, monospace" font-size="9" fill="#6e6859" letter-spacing="1.5">FIG · YOUR ROOM · LIVE PREVIEW</text>
+              <text x="16" y="20" font-family="JetBrains Mono, monospace" font-size="9" fill="#6e6859" letter-spacing="1.5">YOUR ROOM · REDRAWS AS YOU EDIT</text>
               <line x1="16" y1="26" x2="484" y2="26" stroke="#6e6859" stroke-width="0.4" opacity="0.5"/>
 
               <line x1="16" y1="260" x2="484" y2="260" stroke="#1a1814" stroke-width="1"/>
@@ -208,11 +195,22 @@
                 <rect x="0" y="11" width="52" height="1.5" fill="#b44019" opacity="0.55"/>
               </g>
 
-              <text id="btuLabel" x="130" y="178" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="13" fill="#6e6859" font-weight="500">→ size me</text>
+              <text id="btuLabel" x="130" y="178" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="13" fill="#6e6859" font-weight="500">← size me</text>
 
-              <g id="occupants"></g>
+              <!-- Window on far wall -->
+              <g id="windowGroup" transform="translate(256, 184)">
+                <rect class="win-frame" x="0" y="0" width="34" height="44" fill="#fffaef" stroke="#1a1814" stroke-width="1.2"/>
+                <line class="win-vert"  x1="17" y1="0" x2="17" y2="44" stroke="#1a1814" stroke-width="0.9"/>
+                <line class="win-horiz" x1="0"  y1="22" x2="34" y2="22" stroke="#1a1814" stroke-width="0.9"/>
+              </g>
+
+              <!-- Door at floor level -->
+              <g id="doorGroup" transform="translate(274, 222)">
+                <rect class="door-frame" x="0" y="0" width="22" height="38" fill="#fbf4e4" stroke="#1a1814" stroke-width="1.2"/>
+                <circle class="door-knob" cx="4" cy="19" r="1.4" fill="#1a1814"/>
+              </g>
             </svg>
-            <figcaption id="roomCaption" aria-live="polite"><strong>Fig · Your room</strong> 400 sq ft · 8 ft ceiling · average sun · 2 occupants.</figcaption>
+            <figcaption id="roomCaption" aria-live="polite"><strong>Your room</strong> 400 sq ft · 8 ft ceiling · average sun.</figcaption>
           </figure>
         </div>
 

@@ -72,9 +72,7 @@
       insulation: parseFloat($('insulation').value),
       sunVal:     $('sun').value,
       sun:        parseFloat($('sun').value),
-      occupants:  parseInt($('occupants').value) || 0,
-      roomtype:   parseFloat($('roomtype').value),
-      floor:      parseFloat($('floor').value)
+      roomtype:   parseFloat($('roomtype').value)
     };
   }
 
@@ -82,15 +80,14 @@
 
   function computeBtu(v) {
     const base = v.sqft * climateRates[v.climate];
-    const occupantAdd = Math.max(0, v.occupants - 2) * 600;
-    let cooling = base * v.ceiling * v.insulation * v.sun * v.floor;
-    cooling += occupantAdd + v.roomtype;
-    let heating = v.sqft * heatingRates[v.climate] * v.ceiling * v.insulation * v.floor;
+    let cooling = base * v.ceiling * v.insulation * v.sun;
+    cooling += v.roomtype;
+    let heating = v.sqft * heatingRates[v.climate] * v.ceiling * v.insulation;
     cooling = roundBtu(cooling);
     heating = roundBtu(heating);
     const recommended = Math.max(cooling, heating);
     const matched = standardSizes.find(s => s >= recommended) || recommended;
-    return { cooling, heating, matched, occupantAdd };
+    return { cooling, heating, matched };
   }
 
   // ----- Room diagram rendering -----
@@ -232,49 +229,46 @@
       raycast.appendChild(path);
     }
 
-    // Occupants
-    const occGroup = document.getElementById('occupants');
-    clearChildren(occGroup);
-    const shown = Math.min(v.occupants, 5);
-    if (shown > 0) {
-      const innerW = roomW - 36;
-      const startX = roomX + 18;
-      for (let i = 0; i < shown; i++) {
-        const fx = startX + (i + 0.5) * (innerW / shown);
-        const fy = floorY - 32;
-        const fig = document.createElementNS(SVG_NS, 'g');
-        fig.setAttribute('transform', 'translate(' + fx + ',' + fy + ')');
-        const head = document.createElementNS(SVG_NS, 'circle');
-        head.setAttribute('cx', 0); head.setAttribute('cy', 0);
-        head.setAttribute('r', 3.2); head.setAttribute('fill', '#1a1814');
-        fig.appendChild(head);
-        const body = document.createElementNS(SVG_NS, 'path');
-        body.setAttribute('d', 'M -4 5 L 4 5 L 3 20 L -3 20 Z');
-        body.setAttribute('fill', '#1a1814');
-        fig.appendChild(body);
-        occGroup.appendChild(fig);
-      }
-      if (v.occupants > 5) {
-        const more = document.createElementNS(SVG_NS, 'text');
-        more.setAttribute('x', roomRight - 8);
-        more.setAttribute('y', floorY - 8);
-        more.setAttribute('text-anchor', 'end');
-        more.setAttribute('font-family', 'JetBrains Mono, monospace');
-        more.setAttribute('font-size', '8.5');
-        more.setAttribute('fill', '#6e6859');
-        more.textContent = '+' + (v.occupants - 5) + ' more';
-        occGroup.appendChild(more);
-      }
+    // Window on the far (right) wall — always visible, reinforces "this is a room"
+    const win = document.getElementById('windowGroup');
+    if (win) {
+      const winX = roomRight - 44;
+      const winY = roomY + 24;
+      const winW = 34;
+      const winH = Math.min(44, roomH - 42);
+      win.setAttribute('transform', 'translate(' + winX + ',' + winY + ')');
+      win.querySelector('.win-frame').setAttribute('width', winW);
+      win.querySelector('.win-frame').setAttribute('height', winH);
+      win.querySelector('.win-vert').setAttribute('x1', winW / 2);
+      win.querySelector('.win-vert').setAttribute('x2', winW / 2);
+      win.querySelector('.win-vert').setAttribute('y2', winH);
+      win.querySelector('.win-horiz').setAttribute('y1', winH / 2);
+      win.querySelector('.win-horiz').setAttribute('y2', winH / 2);
+      win.querySelector('.win-horiz').setAttribute('x2', winW);
+    }
+
+    // Door — floor level, right side of the room, always visible
+    const door = document.getElementById('doorGroup');
+    if (door) {
+      const doorW = 22;
+      const doorH = Math.min(42, roomH - 14);
+      const doorX = roomRight - doorW - 4;
+      const doorY = floorY - doorH;
+      door.setAttribute('transform', 'translate(' + doorX + ',' + doorY + ')');
+      door.querySelector('.door-frame').setAttribute('width', doorW);
+      door.querySelector('.door-frame').setAttribute('height', doorH);
+      // knob
+      door.querySelector('.door-knob').setAttribute('cx', 4);
+      door.querySelector('.door-knob').setAttribute('cy', doorH / 2);
     }
 
     // Figure caption (aria-live)
     const cap = document.getElementById('roomCaption');
     if (cap) {
-      const occText = v.occupants === 1 ? '1 occupant' : v.occupants + ' occupants';
-      cap.innerHTML = '<strong>Fig · Your room</strong> ' +
+      cap.innerHTML = '<strong>Your room</strong> ' +
                       v.sqft.toLocaleString() + ' sq ft · ' +
                       ceil.label + ' ceiling · ' +
-                      sunS.label + ' · ' + occText + '.';
+                      sunS.label + '.';
     }
   }
 
@@ -283,7 +277,7 @@
     opts = opts || {};
     const v = getFormValues();
     const r = computeBtu(v);
-    const { cooling, heating, matched, occupantAdd } = r;
+    const { cooling, heating, matched } = r;
 
     document.getElementById('btuNum').textContent  = matched.toLocaleString();
     document.getElementById('tonNum').textContent  = (matched / 12000).toFixed(1);
@@ -323,8 +317,6 @@
       '<div class="breakdown-row"><span>× ceiling height adjustment</span><span>' + v.ceiling.toFixed(2) + '×</span></div>' +
       '<div class="breakdown-row"><span>× insulation adjustment</span><span>' + v.insulation.toFixed(2) + '×</span></div>' +
       '<div class="breakdown-row"><span>× sun exposure adjustment</span><span>' + v.sun.toFixed(2) + '×</span></div>' +
-      '<div class="breakdown-row"><span>× floor adjustment</span><span>' + v.floor.toFixed(2) + '×</span></div>' +
-      '<div class="breakdown-row"><span>+ extra occupants</span><span>+' + occupantAdd.toLocaleString() + '</span></div>' +
       (v.roomtype ? '<div class="breakdown-row"><span>+ room-type load</span><span>+' + v.roomtype.toLocaleString() + '</span></div>' : '') +
       '<div class="breakdown-row total"><span>Recommended (rounded up to standard size)</span><span>' + matched.toLocaleString() + ' BTU</span></div>';
 
@@ -389,7 +381,7 @@
   // ----- Wire up live rendering (calc + room) -----
   function init() {
     if (!document.getElementById('btuForm')) return;
-    const allIds = ['sqft', 'ceiling', 'climate', 'insulation', 'sun', 'occupants', 'roomtype', 'floor'];
+    const allIds = ['sqft', 'ceiling', 'climate', 'insulation', 'sun', 'roomtype'];
     let timer;
     allIds.forEach(id => {
       const el = document.getElementById(id);
