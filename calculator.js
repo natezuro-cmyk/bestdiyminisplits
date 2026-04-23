@@ -62,6 +62,14 @@
     '1.1': { r: 17, opacity: 0.75, rays: 8,  label: 'sunny' },
     '1.2': { r: 22, opacity: 0.95, rays: 10, label: 'full sun' }
   };
+  // What shows through the window based on climate zone
+  const climateWindow = {
+    hot:   { bg: '#f5c69f', scene: 'palm',     label: 'palms' },
+    warm:  { bg: '#e8cb82', scene: 'cactus',   label: 'desert' },
+    mixed: { bg: '#c8dcec', scene: 'tree',     label: 'oak tree' },
+    cool:  { bg: '#b6c6d2', scene: 'pine',     label: 'evergreen' },
+    cold:  { bg: '#d8e5ec', scene: 'snowpine', label: 'snow' }
+  };
 
   function getFormValues() {
     const $ = (id) => document.getElementById(id);
@@ -103,6 +111,108 @@
   }
   function setAttrs(el, attrs) {
     for (const k in attrs) el.setAttribute(k, attrs[k]);
+  }
+  function mk(tag, attrs) {
+    const el = document.createElementNS(SVG_NS, tag);
+    if (attrs) setAttrs(el, attrs);
+    return el;
+  }
+
+  // Silhouettes shown through the window — change with climate
+  function drawWindowScene(group, w, h, scene) {
+    clearChildren(group);
+    if (scene === 'palm') {
+      const tx = w * 0.72, top = h * 0.4;
+      group.appendChild(mk('path', {
+        d: 'M ' + tx + ' ' + (h * 0.95) + ' Q ' + (tx + 4) + ' ' + (h * 0.7) + ' ' + (tx - 1) + ' ' + top,
+        stroke: '#6b4423', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round'
+      }));
+      ['q -14 -2 -24 4', 'q -12 -8 -18 -14', 'q 0 -14 4 -22', 'q 14 -6 20 -12', 'q 16 6 22 0']
+        .forEach(q => group.appendChild(mk('path', {
+          d: 'M ' + tx + ' ' + top + ' ' + q,
+          stroke: '#2d5a3d', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round'
+        })));
+    }
+    else if (scene === 'cactus') {
+      const cx = w * 0.28, cw = w * 0.13;
+      const top = h * 0.32, bot = h * 0.95;
+      group.appendChild(mk('rect', {
+        x: cx - cw / 2, y: top, width: cw, height: bot - top, rx: cw / 2,
+        fill: '#5a7d4f', stroke: '#3a5d2f', 'stroke-width': 0.7
+      }));
+      const armY = top + (bot - top) * 0.4;
+      const armH = (bot - top) * 0.38;
+      group.appendChild(mk('path', {
+        d: 'M ' + (cx + cw / 2 - 0.3) + ' ' + armY +
+           ' h ' + (w * 0.1) +
+           ' v -' + armH +
+           ' a 3 3 0 0 1 3 -3' +
+           ' h ' + (cw * 0.55) +
+           ' a 3 3 0 0 1 3 3' +
+           ' v ' + (armH + cw * 0.5) +
+           ' h -' + (w * 0.1 + cw * 0.55) + ' Z',
+        fill: '#5a7d4f', stroke: '#3a5d2f', 'stroke-width': 0.7
+      }));
+    }
+    else if (scene === 'tree') {
+      const tx = w * 0.5;
+      group.appendChild(mk('rect', {
+        x: tx - 2, y: h * 0.6, width: 4, height: h * 0.35, fill: '#6b4423'
+      }));
+      group.appendChild(mk('circle', {
+        cx: tx, cy: h * 0.5, r: h * 0.26, fill: '#4a7a4e', stroke: '#2d5a3d', 'stroke-width': 0.6
+      }));
+      group.appendChild(mk('circle', {
+        cx: tx - h * 0.16, cy: h * 0.48, r: h * 0.16, fill: '#4a7a4e', stroke: '#2d5a3d', 'stroke-width': 0.6
+      }));
+      group.appendChild(mk('circle', {
+        cx: tx + h * 0.16, cy: h * 0.53, r: h * 0.15, fill: '#4a7a4e', stroke: '#2d5a3d', 'stroke-width': 0.6
+      }));
+    }
+    else if (scene === 'pine') {
+      const tx = w * 0.55;
+      const top = h * 0.18, bot = h * 0.88;
+      group.appendChild(mk('rect', {
+        x: tx - 2, y: bot, width: 4, height: h * 0.08, fill: '#4a2e1a'
+      }));
+      group.appendChild(mk('path', {
+        d: 'M ' + tx + ' ' + top +
+           ' L ' + (tx - w * 0.17) + ' ' + bot +
+           ' L ' + (tx + w * 0.17) + ' ' + bot + ' Z',
+        fill: '#2d4a2f', stroke: '#1a3320', 'stroke-width': 0.6
+      }));
+    }
+    else if (scene === 'snowpine') {
+      const tx = w * 0.55;
+      const top = h * 0.22, bot = h * 0.88;
+      group.appendChild(mk('rect', {
+        x: tx - 2, y: bot, width: 4, height: h * 0.08, fill: '#3a241a'
+      }));
+      group.appendChild(mk('path', {
+        d: 'M ' + tx + ' ' + top +
+           ' L ' + (tx - w * 0.17) + ' ' + bot +
+           ' L ' + (tx + w * 0.17) + ' ' + bot + ' Z',
+        fill: '#264530', stroke: '#1a2820', 'stroke-width': 0.6
+      }));
+      // Snow cap near top of pine
+      group.appendChild(mk('path', {
+        d: 'M ' + tx + ' ' + top +
+           ' L ' + (tx - w * 0.055) + ' ' + (top + h * 0.14) +
+           ' L ' + (tx + w * 0.055) + ' ' + (top + h * 0.14) + ' Z',
+        fill: '#ffffff', opacity: 0.92
+      }));
+      // Snowflakes in the sky
+      const flakes = [
+        [w * 0.18, h * 0.2],
+        [w * 0.34, h * 0.36],
+        [w * 0.85, h * 0.3],
+        [w * 0.12, h * 0.55],
+        [w * 0.92, h * 0.58]
+      ];
+      flakes.forEach(function (pt) {
+        group.appendChild(mk('circle', { cx: pt[0], cy: pt[1], r: 1.4, fill: '#ffffff' }));
+      });
+    }
   }
 
   // Isometric projection constants (how the floor tilts back)
@@ -191,7 +301,13 @@
     const winY = clD.y + (wallH - winH) / 2 + 6;
     const win = document.getElementById('windowGroup');
     win.setAttribute('transform', 'translate(' + winX + ',' + winY + ')');
-    setAttrs(win.querySelector('.win-frame'), { width: winW, height: winH });
+    const cw = climateWindow[v.climate] || climateWindow.mixed;
+    setAttrs(win.querySelector('.win-frame'), {
+      width: winW, height: winH, fill: cw.bg
+    });
+    // Climate scene (palm/cactus/tree/pine/snowpine) behind the mullions
+    drawWindowScene(document.getElementById('windowScene'), winW, winH, cw.scene);
+    // Mullions (drawn on top by being later in DOM)
     setAttrs(win.querySelector('.win-vert'),  { x1: winW / 2, x2: winW / 2, y1: 0, y2: winH });
     setAttrs(win.querySelector('.win-horiz'), { x1: 0, x2: winW, y1: winH / 2, y2: winH / 2 });
 
