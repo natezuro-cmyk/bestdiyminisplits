@@ -49,16 +49,17 @@
   };
 
   // ----- Room diagram lookup tables -----
+  // Wall pixel height per ceiling option (sub-proportional to avoid stretching)
   const ceilingMap = {
-    '1.0':  { y: 160, label: "8 ft", short: "8'" },
-    '1.12': { y: 140, label: "9 ft", short: "9'" },
-    '1.25': { y: 120, label: "10 ft", short: "10'" },
-    '1.4':  { y: 88,  label: "12 ft+", short: "12'+" }
+    '1.0':  { wallH: 80,  label: "8 ft",   short: "8'" },
+    '1.12': { wallH: 92,  label: "9 ft",   short: "9'" },
+    '1.25': { wallH: 105, label: "10 ft",  short: "10'" },
+    '1.4':  { wallH: 124, label: "12 ft+", short: "12'+" }
   };
   const sunMap = {
-    '0.9': { r: 8,  opacity: 0.25, rays: 0, label: 'heavily shaded' },
-    '1.0': { r: 13, opacity: 0.5,  rays: 6, label: 'average sun' },
-    '1.1': { r: 17, opacity: 0.75, rays: 8, label: 'sunny' },
+    '0.9': { r: 8,  opacity: 0.25, rays: 0,  label: 'heavily shaded' },
+    '1.0': { r: 13, opacity: 0.5,  rays: 6,  label: 'average sun' },
+    '1.1': { r: 17, opacity: 0.75, rays: 8,  label: 'sunny' },
     '1.2': { r: 22, opacity: 0.95, rays: 10, label: 'full sun' }
   };
 
@@ -90,20 +91,23 @@
     return { cooling, heating, matched };
   }
 
-  // ----- Room diagram rendering -----
+  // ----- Room diagram (isometric 3D cutaway) -----
   function dimsFromSqft(sqft) {
     const ratio = 1.56;
     const w = Math.max(6, Math.round(Math.sqrt(sqft / ratio)));
     const l = Math.max(6, Math.round(Math.sqrt(sqft * ratio)));
     return { w, l };
   }
-  function roomWidthPx(sqft) {
-    const factor = Math.sqrt(sqft / 400);
-    return Math.max(160, Math.min(340, Math.round(240 * factor)));
-  }
   function clearChildren(node) {
     while (node.firstChild) node.removeChild(node.firstChild);
   }
+  function setAttrs(el, attrs) {
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+  }
+
+  // Isometric projection constants (how the floor tilts back)
+  const ISO_DX = 0.55;  // horizontal shift per unit of depth
+  const ISO_DY = 0.32;  // vertical shift per unit of depth
 
   function renderRoom(matchedBtu) {
     const svg = document.getElementById('roomSvg');
@@ -113,73 +117,173 @@
     const ceil = ceilingMap[v.ceilingVal] || ceilingMap['1.0'];
     const sunS = sunMap[v.sunVal] || sunMap['1.0'];
     const dims = dimsFromSqft(v.sqft);
-    const roomW = roomWidthPx(v.sqft);
 
-    const floorY = 260;
-    const roomX = 60;
-    const roomY = ceil.y;
-    const roomRight = roomX + roomW;
-    const roomH = floorY - roomY;
+    // Scale floor dimensions by √sqft so the room plausibly grows/shrinks
+    const scale = Math.sqrt(v.sqft / 400);
+    const roomW = Math.max(130, Math.min(240, Math.round(180 * scale)));
+    const roomD = Math.max(80,  Math.min(170, Math.round(120 * scale)));
+    const wallH = ceil.wallH;
 
-    // Room rectangle
-    const rect = document.getElementById('roomRect');
-    rect.setAttribute('x', roomX);
-    rect.setAttribute('y', roomY);
-    rect.setAttribute('width', roomW);
-    rect.setAttribute('height', roomH);
+    // Isometric depth offsets
+    const dx = roomD * ISO_DX;
+    const dy = roomD * ISO_DY;
 
-    // Left + right wall hatch (insulation feel) — simple tick pattern
-    const hatch = document.getElementById('wallHatch');
-    clearChildren(hatch);
-    const tickStep = 14;
-    for (let y = roomY + 6; y < floorY - 2; y += tickStep) {
-      const mkLine = (x1, y1, x2, y2) => {
-        const line = document.createElementNS(SVG_NS, 'line');
-        line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-        line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-        line.setAttribute('stroke', '#1a1814');
-        line.setAttribute('stroke-width', '0.5');
-        line.setAttribute('opacity', '0.42');
-        return line;
-      };
-      hatch.appendChild(mkLine(roomX - 5, y, roomX + 3, y + 8));
-      hatch.appendChild(mkLine(roomRight - 3, y, roomRight + 5, y + 8));
+    // Anchor: bottom-front-left of the floor. Centered horizontally in viewport.
+    const viewW = 500;
+    const anchorX = Math.round((viewW - roomW - dx) / 2);
+    const anchorY = 240;
+
+    // Corner points of the floor quad
+    const flA = { x: anchorX,              y: anchorY };       // front-left
+    const flB = { x: anchorX + roomW,      y: anchorY };       // front-right
+    const flC = { x: anchorX + roomW + dx, y: anchorY - dy };  // back-right
+    const flD = { x: anchorX + dx,         y: anchorY - dy };  // back-left
+    // Ceiling corners (just wallH above each floor corner)
+    const clA = { x: flA.x, y: flA.y - wallH };
+    const clD = { x: flD.x, y: flD.y - wallH };
+    const clC = { x: flC.x, y: flC.y - wallH };
+
+    // ----- Floor, back wall, left wall -----
+    document.getElementById('floorPath').setAttribute('d',
+      'M ' + flA.x + ' ' + flA.y +
+      ' L ' + flB.x + ' ' + flB.y +
+      ' L ' + flC.x + ' ' + flC.y +
+      ' L ' + flD.x + ' ' + flD.y + ' Z');
+
+    document.getElementById('backWallPath').setAttribute('d',
+      'M ' + flD.x + ' ' + flD.y +
+      ' L ' + flC.x + ' ' + flC.y +
+      ' L ' + clC.x + ' ' + clC.y +
+      ' L ' + clD.x + ' ' + clD.y + ' Z');
+
+    document.getElementById('leftWallPath').setAttribute('d',
+      'M ' + flA.x + ' ' + flA.y +
+      ' L ' + flD.x + ' ' + flD.y +
+      ' L ' + clD.x + ' ' + clD.y +
+      ' L ' + clA.x + ' ' + clA.y + ' Z');
+
+    // Floor boards — horizontal lines running into the depth
+    const floorLines = document.getElementById('floorLines');
+    clearChildren(floorLines);
+    for (let t = 0.2; t < 1; t += 0.2) {
+      const p1 = { x: flA.x + t * dx, y: flA.y - t * dy };
+      const p2 = { x: flB.x + t * dx, y: flB.y - t * dy };
+      const line = document.createElementNS(SVG_NS, 'line');
+      setAttrs(line, {
+        x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+        stroke: '#8a6340', 'stroke-width': '0.5', opacity: '0.45'
+      });
+      floorLines.appendChild(line);
     }
 
-    // Ceiling-height dimension line (right side)
-    const dimH = document.getElementById('dimH');
-    dimH.setAttribute('x1', roomRight + 16);
-    dimH.setAttribute('x2', roomRight + 16);
-    dimH.setAttribute('y1', roomY);
-    dimH.setAttribute('y2', floorY);
-    document.getElementById('dimHTop').setAttribute('y1', roomY);
-    document.getElementById('dimHTop').setAttribute('y2', roomY);
-    document.getElementById('dimHTop').setAttribute('x1', roomRight + 12);
-    document.getElementById('dimHTop').setAttribute('x2', roomRight + 20);
-    document.getElementById('dimHBot').setAttribute('y1', floorY);
-    document.getElementById('dimHBot').setAttribute('y2', floorY);
-    document.getElementById('dimHBot').setAttribute('x1', roomRight + 12);
-    document.getElementById('dimHBot').setAttribute('x2', roomRight + 20);
-    const dimHLabel = document.getElementById('dimHLabel');
-    dimHLabel.setAttribute('x', roomRight + 22);
-    dimHLabel.setAttribute('y', (roomY + floorY) / 2 + 3);
-    dimHLabel.textContent = ceil.short;
+    // Dimension label on the floor
+    const dimWLbl = document.getElementById('dimWLabel');
+    setAttrs(dimWLbl, {
+      x: (flA.x + flB.x + flC.x + flD.x) / 4,
+      y: (flA.y + flB.y + flC.y + flD.y) / 4 + 4
+    });
+    dimWLbl.textContent = dims.w + "' × " + dims.l + "'";
 
-    // Width label inside the room
-    const dimW = document.getElementById('dimWLabel');
-    dimW.setAttribute('x', roomX + roomW / 2);
-    dimW.setAttribute('y', floorY - 8);
-    dimW.textContent = dims.w + "' × " + dims.l + "'";
+    // Window on back wall — right half, centered vertically
+    const winW = Math.min(80, roomW * 0.42);
+    const winH = Math.min(48, wallH * 0.48);
+    const winX = flD.x + roomW - winW - 14;
+    const winY = clD.y + (wallH - winH) / 2 + 6;
+    const win = document.getElementById('windowGroup');
+    win.setAttribute('transform', 'translate(' + winX + ',' + winY + ')');
+    setAttrs(win.querySelector('.win-frame'), { width: winW, height: winH });
+    setAttrs(win.querySelector('.win-vert'),  { x1: winW / 2, x2: winW / 2, y1: 0, y2: winH });
+    setAttrs(win.querySelector('.win-horiz'), { x1: 0, x2: winW, y1: winH / 2, y2: winH / 2 });
 
-    // Mini split head on left wall (position scales with ceiling)
-    const ms = document.getElementById('minisplit');
-    const msY = roomY + 6;
-    ms.setAttribute('transform', 'translate(' + (roomX + 10) + ',' + msY + ')');
+    // Door on left wall — near back, full-height parallelogram projected along the wall
+    // Parametric position along left wall floor: t = 0.48 (door starts back-center)
+    const tDoor = 0.48;
+    const doorWunits = 22;                 // door width "along" wall in px
+    const doorH = Math.min(62, wallH * 0.72);
+    const wallDir = { x: dx / roomD, y: -dy / roomD };  // unit vector along left wall floor edge
+    const dfX = flA.x + tDoor * dx;        // door front-bottom x
+    const dfY = flA.y - tDoor * dy;        // door front-bottom y
+    const dbX = dfX + doorWunits * wallDir.x;
+    const dbY = dfY + doorWunits * wallDir.y;
+    document.getElementById('doorPath').setAttribute('d',
+      'M ' + dfX + ' ' + dfY +
+      ' L ' + dbX + ' ' + dbY +
+      ' L ' + dbX + ' ' + (dbY - doorH) +
+      ' L ' + dfX + ' ' + (dfY - doorH) + ' Z');
+    // knob
+    const knobX = dfX + 4 * wallDir.x;
+    const knobY = dfY + 4 * wallDir.y - doorH / 2;
+    setAttrs(document.getElementById('doorKnob'), { cx: knobX, cy: knobY });
 
-    // BTU callout — arrow points LEFT back toward the mini split
+    // Sofa — on the floor, slight iso perspective, center-ish
+    const sofa = document.getElementById('sofa');
+    clearChildren(sofa);
+    const sofaWidth = Math.min(roomW * 0.45, 96);
+    const sofaDepth = Math.min(roomD * 0.35, 40);
+    // Sofa front-left on the floor, centered-ish
+    const sxFL = flA.x + (roomW - sofaWidth) / 2;
+    const syFL = flA.y - 6;
+    const sxFR = sxFL + sofaWidth;
+    const syFR = syFL;
+    const sxBR = sxFR + sofaDepth * ISO_DX;
+    const syBR = syFR - sofaDepth * ISO_DY;
+    const sxBL = sxFL + sofaDepth * ISO_DX;
+    const syBL = syFL - sofaDepth * ISO_DY;
+    const sofaHeight = 18;
+    const sofaBackHeight = 12;
+    // Base (floor footprint)
+    const base = document.createElementNS(SVG_NS, 'path');
+    setAttrs(base, {
+      d: 'M ' + sxFL + ' ' + syFL + ' L ' + sxFR + ' ' + syFR +
+         ' L ' + sxBR + ' ' + syBR + ' L ' + sxBL + ' ' + syBL + ' Z',
+      fill: '#1a1814', opacity: '0.12'
+    });
+    sofa.appendChild(base);
+    // Front face (seat)
+    const front = document.createElementNS(SVG_NS, 'path');
+    setAttrs(front, {
+      d: 'M ' + sxFL + ' ' + syFL + ' L ' + sxFR + ' ' + syFR +
+         ' L ' + sxFR + ' ' + (syFR - sofaHeight) + ' L ' + sxFL + ' ' + (syFL - sofaHeight) + ' Z',
+      fill: '#234a5c', stroke: '#1a1814', 'stroke-width': '0.8'
+    });
+    sofa.appendChild(front);
+    // Right side
+    const right = document.createElementNS(SVG_NS, 'path');
+    setAttrs(right, {
+      d: 'M ' + sxFR + ' ' + syFR + ' L ' + sxBR + ' ' + syBR +
+         ' L ' + sxBR + ' ' + (syBR - sofaHeight) + ' L ' + sxFR + ' ' + (syFR - sofaHeight) + ' Z',
+      fill: '#1a3342', stroke: '#1a1814', 'stroke-width': '0.8'
+    });
+    sofa.appendChild(right);
+    // Top (seat cushion)
+    const top = document.createElementNS(SVG_NS, 'path');
+    setAttrs(top, {
+      d: 'M ' + sxFL + ' ' + (syFL - sofaHeight) + ' L ' + sxFR + ' ' + (syFR - sofaHeight) +
+         ' L ' + sxBR + ' ' + (syBR - sofaHeight) + ' L ' + sxBL + ' ' + (syBL - sofaHeight) + ' Z',
+      fill: '#2c5a70', stroke: '#1a1814', 'stroke-width': '0.8'
+    });
+    sofa.appendChild(top);
+    // Back cushion (raised back wall of the sofa)
+    const backRest = document.createElementNS(SVG_NS, 'path');
+    setAttrs(backRest, {
+      d: 'M ' + sxBL + ' ' + (syBL - sofaHeight) + ' L ' + sxBR + ' ' + (syBR - sofaHeight) +
+         ' L ' + sxBR + ' ' + (syBR - sofaHeight - sofaBackHeight) + ' L ' + sxBL + ' ' + (syBL - sofaHeight - sofaBackHeight) + ' Z',
+      fill: '#1a3342', stroke: '#1a1814', 'stroke-width': '0.8'
+    });
+    sofa.appendChild(backRest);
+
+    // Mini split — on back wall, centered horizontally, high
+    const msW = 50, msH = 11;
+    const msX = flD.x + (roomW - msW) / 2;
+    const msY = clD.y + 12;
+    document.getElementById('minisplit').setAttribute('transform', 'translate(' + msX + ',' + msY + ')');
+
+    // BTU callout — floating label on back wall next to the mini split
     const btu = document.getElementById('btuLabel');
-    btu.setAttribute('x', roomX + 66);
-    btu.setAttribute('y', msY + 12);
+    setAttrs(btu, {
+      x: msX + msW + 6,
+      y: msY + 9
+    });
     if (typeof matchedBtu === 'number') {
       btu.textContent = '← ' + (matchedBtu / 1000) + 'k BTU';
       btu.setAttribute('fill', '#b44019');
@@ -189,78 +293,45 @@
       btu.setAttribute('fill', '#6e6859');
     }
 
-    // Sun (upper right, outside the room)
+    // Sun — top right, outside the room
     const sunCircle = document.getElementById('sunCircle');
     sunCircle.setAttribute('r', sunS.r);
     sunCircle.setAttribute('opacity', sunS.opacity);
 
     const sunRays = document.getElementById('sunRays');
     clearChildren(sunRays);
-    const sunCx = 432, sunCy = 62;
+    const sunCx = 455, sunCy = 50;
+    sunCircle.setAttribute('cx', sunCx);
+    sunCircle.setAttribute('cy', sunCy);
     for (let i = 0; i < sunS.rays; i++) {
       const angle = (i / sunS.rays) * Math.PI * 2;
       const r1 = sunS.r + 3, r2 = sunS.r + 9;
       const line = document.createElementNS(SVG_NS, 'line');
-      line.setAttribute('x1', sunCx + Math.cos(angle) * r1);
-      line.setAttribute('y1', sunCy + Math.sin(angle) * r1);
-      line.setAttribute('x2', sunCx + Math.cos(angle) * r2);
-      line.setAttribute('y2', sunCy + Math.sin(angle) * r2);
-      line.setAttribute('stroke', '#b44019');
-      line.setAttribute('stroke-width', '0.9');
-      line.setAttribute('stroke-linecap', 'round');
-      line.setAttribute('opacity', sunS.opacity);
+      setAttrs(line, {
+        x1: sunCx + Math.cos(angle) * r1,
+        y1: sunCy + Math.sin(angle) * r1,
+        x2: sunCx + Math.cos(angle) * r2,
+        y2: sunCy + Math.sin(angle) * r2,
+        stroke: '#b44019', 'stroke-width': '0.9',
+        'stroke-linecap': 'round', opacity: sunS.opacity
+      });
       sunRays.appendChild(line);
     }
 
-    // Sun-ray cast on floor inside room (subtle)
-    const raycast = document.getElementById('rayCast');
-    clearChildren(raycast);
-    if (sunS.r > 10 && roomRight > sunCx - 120) {
-      const castX1 = roomRight - Math.min(roomW * 0.6, 80);
-      const castX2 = roomRight - 8;
-      const castY  = floorY - 2;
-      const path = document.createElementNS(SVG_NS, 'path');
-      path.setAttribute('d', 'M ' + castX1 + ' ' + castY +
-                              ' L ' + castX2 + ' ' + castY +
-                              ' L ' + (castX2 - 18) + ' ' + (castY - 22) +
-                              ' L ' + (castX1 + 14) + ' ' + (castY - 22) + ' Z');
-      path.setAttribute('fill', '#b44019');
-      path.setAttribute('opacity', sunS.opacity * 0.18);
-      raycast.appendChild(path);
-    }
-
-    // Window on the far (right) wall — always visible, reinforces "this is a room"
-    const win = document.getElementById('windowGroup');
-    if (win) {
-      const winX = roomRight - 44;
-      const winY = roomY + 24;
-      const winW = 34;
-      const winH = Math.min(44, roomH - 42);
-      win.setAttribute('transform', 'translate(' + winX + ',' + winY + ')');
-      win.querySelector('.win-frame').setAttribute('width', winW);
-      win.querySelector('.win-frame').setAttribute('height', winH);
-      win.querySelector('.win-vert').setAttribute('x1', winW / 2);
-      win.querySelector('.win-vert').setAttribute('x2', winW / 2);
-      win.querySelector('.win-vert').setAttribute('y2', winH);
-      win.querySelector('.win-horiz').setAttribute('y1', winH / 2);
-      win.querySelector('.win-horiz').setAttribute('y2', winH / 2);
-      win.querySelector('.win-horiz').setAttribute('x2', winW);
-    }
-
-    // Door — floor level, right side of the room, always visible
-    const door = document.getElementById('doorGroup');
-    if (door) {
-      const doorW = 22;
-      const doorH = Math.min(42, roomH - 14);
-      const doorX = roomRight - doorW - 4;
-      const doorY = floorY - doorH;
-      door.setAttribute('transform', 'translate(' + doorX + ',' + doorY + ')');
-      door.querySelector('.door-frame').setAttribute('width', doorW);
-      door.querySelector('.door-frame').setAttribute('height', doorH);
-      // knob
-      door.querySelector('.door-knob').setAttribute('cx', 4);
-      door.querySelector('.door-knob').setAttribute('cy', doorH / 2);
-    }
+    // Ceiling-height dimension line — outside the room on the right
+    const dimX = flC.x + 16;
+    setAttrs(document.getElementById('dimH'),
+      { x1: dimX, y1: clC.y, x2: dimX, y2: flC.y });
+    setAttrs(document.getElementById('dimHTop'),
+      { x1: dimX - 4, y1: clC.y, x2: dimX + 4, y2: clC.y });
+    setAttrs(document.getElementById('dimHBot'),
+      { x1: dimX - 4, y1: flC.y, x2: dimX + 4, y2: flC.y });
+    const dimHLabel = document.getElementById('dimHLabel');
+    setAttrs(dimHLabel, {
+      x: dimX + 7,
+      y: (clC.y + flC.y) / 2 + 4
+    });
+    dimHLabel.textContent = ceil.short;
 
     // Figure caption (aria-live)
     const cap = document.getElementById('roomCaption');
