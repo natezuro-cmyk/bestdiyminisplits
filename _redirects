@@ -1,0 +1,26 @@
+# Cloudflare Pages redirects
+# Canonicalize all traffic to extensionless URLs.
+
+# Force www → apex (if you want apex.)
+# Uncomment after DNS is set up if you prefer apex domain.
+# https://www.bestdiyminisplits.com/* https://bestdiyminisplits.com/:splat 301
+
+# Old .html URLs → clean URLs (301 redirect preserves SEO for any old backlinks)
+/calculator.html           /mini-split-sizing-calculator           301
+/buyers-guide.html         /best-mini-splits                       301
+/install-guide.html        /diy-mini-split-installation            301
+/calculator                /mini-split-sizing-calculator           301
+/buyers-guide              /best-mini-splits                       301
+/install-guide             /diy-mini-split-installation            301
+
+# Common typo redirects (captures traffic from people typing search queries)
+/btu-calculator            /mini-split-sizing-calculator           301
+/sizing-calculator         /mini-split-sizing-calculator           301
+/best-mini-split           /best-mini-splits                       301
+/diy-install               /diy-mini-split-installation            301
+/install                   /diy-mini-split-installation            301
+
+# Trailing slash: serve without trailing slash to avoid duplicate content
+/mini-split-sizing-calculator/     /mini-split-sizing-calculator   301
+/best-mini-splits/                 /best-mini-splits               301
+/diy-mini-split-installation/      /diy-mini-split-installation    301

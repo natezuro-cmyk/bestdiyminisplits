@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Split Sizing Calculator — Free BTU Calculator (2026) | BestDIYMiniSplits</title>
+  <meta name="description" content="Free mini split BTU sizing calculator. Enter your room size, climate, insulation, and sun exposure to get the exact capacity you need — plus matching unit recommendations." />
+  <link rel="canonical" href="https://bestdiyminisplits.com/mini-split-sizing-calculator" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Free Mini Split Sizing Calculator" />
+  <meta property="og:description" content="Size your mini split in 60 seconds with our free calculator." />
+  <meta property="og:url" content="https://bestdiyminisplits.com/mini-split-sizing-calculator" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a7c5a'/><text x='16' y='22' font-family='Arial' font-size='18' font-weight='700' text-anchor='middle' fill='white'>M</text></svg>" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Mini Split BTU Sizing Calculator",
+    "url": "https://bestdiyminisplits.com/mini-split-sizing-calculator",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Free calculator that sizes the correct mini split BTU capacity for any room based on square footage, climate, insulation, and sun exposure."
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"Home","item":"https://bestdiyminisplits.com/"},
+      {"@type":"ListItem","position":2,"name":"BTU Calculator","item":"https://bestdiyminisplits.com/mini-split-sizing-calculator"}
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a href="/" class="logo">
+      <span class="logo-mark">M</span>
+      <span>Best DIY Mini Splits</span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="mini-split-sizing-calculator">BTU Calculator</a></li>
+      <li><a href="best-mini-splits">Buyer's Guide</a></li>
+      <li><a href="diy-mini-split-installation">Install Guide</a></li>
+      <li><a href="#quotes" class="nav-cta">Get Quotes</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+  </div>
+</header>
+
+<section style="padding-top: 48px;">
+  <div class="container container-narrow">
+    <p style="font-size:0.88rem; color:var(--color-muted); margin-bottom:8px;">
+      <a href="/" style="color:var(--color-muted);">Home</a> → BTU Calculator
+    </p>
+    <h1>Mini Split Sizing Calculator</h1>
+    <p style="font-size:1.15rem; color:var(--color-text-soft);">
+      Enter your room details below to get a precise BTU recommendation. Our calculator uses
+      the same load-calculation principles as ACCA Manual J — adjusted for the 5 factors
+      that swing sizing the most.
+    </p>
+  </div>
+</section>
+
+<!-- ==========  CALCULATOR  ========== -->
+<section id="calculator" style="padding-top: 24px;">
+  <div class="container">
+    <div class="calc-wrap" style="max-width: 900px; margin: 0 auto;">
+      <div class="calc-header">
+        <h2>Mini Split BTU Sizing Calculator</h2>
+        <p>Free · No email · Results in 10 seconds</p>
+      </div>
+      <div class="calc-body">
+        <form id="btuForm" onsubmit="event.preventDefault(); calculateBtu();">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="sqft">Room size (sq ft)</label>
+              <input type="number" id="sqft" min="50" max="5000" value="400" required />
+              <span class="hint">Length × width of the space</span>
+            </div>
+            <div class="form-field">
+              <label for="ceiling">Ceiling height</label>
+              <select id="ceiling">
+                <option value="1.0">Standard (8 ft)</option>
+                <option value="1.12">9 ft</option>
+                <option value="1.25">10 ft</option>
+                <option value="1.4">Vaulted / 12 ft+</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="climate">Climate zone</label>
+              <select id="climate">
+                <option value="hot">Hot &amp; humid (FL, TX, GA, LA)</option>
+                <option value="warm">Warm (CA, AZ, NM, southern states)</option>
+                <option value="mixed" selected>Mixed (most of US)</option>
+                <option value="cool">Cool (Pacific NW, New England)</option>
+                <option value="cold">Cold (MN, ND, Canada, mountains)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="insulation">Insulation quality</label>
+              <select id="insulation">
+                <option value="0.85">Excellent (new build, sprayed)</option>
+                <option value="1.0" selected>Average (most homes)</option>
+                <option value="1.2">Poor (old home, drafty)</option>
+                <option value="1.35">Very poor (garage, shed)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="sun">Sun exposure</label>
+              <select id="sun">
+                <option value="0.9">Heavily shaded</option>
+                <option value="1.0" selected>Average</option>
+                <option value="1.1">Sunny (lots of windows)</option>
+                <option value="1.2">Very sunny (south/west full sun)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="occupants">Regular occupants</label>
+              <input type="number" id="occupants" min="0" max="20" value="2" />
+              <span class="hint">People normally in the room</span>
+            </div>
+            <div class="form-field">
+              <label for="roomtype">Room type</label>
+              <select id="roomtype">
+                <option value="0">Bedroom / office</option>
+                <option value="0" selected>Living room</option>
+                <option value="4000">Kitchen (heavy appliances)</option>
+                <option value="1500">Sun room</option>
+                <option value="0">Garage / workshop</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="floor">Floor</label>
+              <select id="floor">
+                <option value="1.0" selected>Middle floor / slab</option>
+                <option value="1.1">Top floor (hot attic above)</option>
+                <option value="0.95">Basement</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 26px;">
+            <button type="submit" class="btn btn-primary btn-block">Calculate My BTU Size</button>
+          </div>
+        </form>
+
+        <div id="result" class="calc-result" aria-live="polite">
+          <div class="result-label">Recommended capacity</div>
+          <div class="result-big"><span id="btuNum">—</span> BTU/hr</div>
+          <p style="margin:6px 0 0; color:var(--color-text-soft);">
+            <span id="tonNum">—</span> tons · Best match: <strong id="unitSize">—</strong>
+          </p>
+
+          <div class="result-two-col">
+            <div class="unit-suggestions">
+              <h4>Common units that match</h4>
+              <ul id="unitList"></ul>
+            </div>
+            <div class="unit-suggestions">
+              <h4>Heating vs cooling</h4>
+              <p style="margin:0; font-size:0.92rem; color:var(--color-text-soft);" id="heatNote"></p>
+            </div>
+          </div>
+
+          <div class="breakdown" id="breakdown"></div>
+
+          <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
+            <a href="#quotes" class="btn btn-primary">Get Free Quotes for This Size →</a>
+            <a href="best-mini-splits" class="btn btn-outline">See Best Units at This Size</a>
+          </div>
+        </div>
+
+        <p style="margin-top: 22px; font-size: 0.85rem; color: var(--color-muted); text-align:center;">
+          Guidance based on simplified Manual J principles. For multi-zone or unusual homes, a pro load calc is recommended.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========  SEO CONTENT (for rankings)  ========== -->
+<section>
+  <div class="container container-narrow prose">
+    <h2>How to size a mini split — the homeowner's version</h2>
+    <p>The single biggest mistake DIY mini split shoppers make is buying too big. A 24,000 BTU unit in a 500 sq ft room sounds like "more power = better," but oversized units short-cycle: they blast cold air for 5 minutes, shut off, and the room's humidity never gets pulled down. The room feels clammy, your electric bill is higher, and the compressor lifespan drops. Under-sizing is worse — the unit just runs 24/7 and never catches up on a hot day.</p>
+    <p>Right-sizing matters, and the sq-ft rules of thumb you'll find on Amazon listings aren't enough. Here's what actually moves the number:</p>
+
+    <h3>The 5 factors that change BTU sizing</h3>
+    <ol>
+      <li><strong>Square footage.</strong> Baseline: ~20 BTU per sq ft in a mixed US climate. Multiply by ceiling height if taller than 8 ft.</li>
+      <li><strong>Climate zone.</strong> Hot &amp; humid climates (Florida, Texas Gulf Coast) need ~25 BTU/ft² for cooling. Cold climates (Minnesota, Maine) need 40–55 BTU/ft² for <em>heating</em> — and heat usually dictates size in a heat pump.</li>
+      <li><strong>Insulation.</strong> A drafty 1920s farmhouse needs 20% more capacity. A new-build with sprayed foam walls needs 15% less.</li>
+      <li><strong>Sun exposure.</strong> A south/west-facing room with big windows gains heat all afternoon — add 10–20%.</li>
+      <li><strong>Occupants &amp; heat-generating equipment.</strong> Each adult over 2 adds ~600 BTU of latent load. Kitchens add 4,000 BTU for cooking loads.</li>
+    </ol>
+
+    <h3>Quick reference: BTU by room size</h3>
+    <p>Use this as a rough sanity check — always run the calculator for a real recommendation.</p>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>Room size</th>
+          <th>Cooling only (mild)</th>
+          <th>Heat pump (cold climate)</th>
+          <th>Typical unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>150 sq ft</td><td>5,000 BTU</td><td>7,000 BTU</td><td>9,000 BTU single-zone</td></tr>
+        <tr><td>250 sq ft</td><td>6,000 BTU</td><td>10,000 BTU</td><td>9,000–12,000 BTU</td></tr>
+        <tr><td>400 sq ft</td><td>9,000 BTU</td><td>14,000 BTU</td><td>12,000 BTU (1 ton)</td></tr>
+        <tr><td>500 sq ft</td><td>11,000 BTU</td><td>18,000 BTU</td><td>12,000–18,000 BTU</td></tr>
+        <tr><td>800 sq ft</td><td>16,000 BTU</td><td>28,000 BTU</td><td>18,000–24,000 BTU</td></tr>
+        <tr><td>1,200 sq ft (open plan)</td><td>22,000 BTU</td><td>40,000 BTU</td><td>24,000 BTU + aux</td></tr>
+        <tr><td>1,500–2,000 sq ft whole home</td><td>30,000 BTU</td><td>50,000+ BTU</td><td>Multi-zone 3–5 head</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Why heating usually drives the size</h3>
+    <p>A mini split is a heat pump — same unit does both cooling <em>and</em> heating by reversing the refrigeration cycle. In any climate cooler than Atlanta, the <strong>heating load is larger than the cooling load</strong>, so the heat output requirement is what determines the unit size. This is why our calculator computes both and recommends the larger number.</p>
+
+    <blockquote>
+      Rule of thumb: in zones 4–7, if you're replacing a furnace with a mini split,
+      size based on heating BTU and confirm the model maintains capacity at your
+      99% design temperature (the coldest 1% of winter hours in your zip code).
+    </blockquote>
+
+    <h3>What to do after you have your BTU number</h3>
+    <p>Once you have the recommended capacity:</p>
+    <ol>
+      <li>Read our <a href="best-mini-splits">2026 Buyer's Guide</a> to pick a brand and efficiency tier.</li>
+      <li>If you're in a cold climate, make sure the model you pick has <strong>rated capacity at 5°F or lower</strong> — not just a marketing "works in cold weather" claim.</li>
+      <li>Decide DIY vs pro install. Our <a href="diy-mini-split-installation">DIY install guide</a> walks through whether you're a good candidate.</li>
+      <li><a href="#quotes">Get a few installer quotes</a> to sanity-check DIY savings against real-world pro pricing in your area.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==========  LEAD CAPTURE  ========== -->
+<section id="quotes" class="lead-band">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" style="color:#8ed7b9;">Now That You Have A Size</span>
+      <h2>Get up to 3 installer quotes for your exact BTU size</h2>
+      <p>Local, vetted HVAC pros who specialize in mini splits. Free, no spam, no obligation.</p>
+    </div>
+    <form class="lead-form" id="leadForm" onsubmit="event.preventDefault(); submitLead();">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="leadName">Your name</label>
+          <input type="text" id="leadName" required />
+        </div>
+        <div class="form-field">
+          <label for="leadZip">Zip code</label>
+          <input type="text" id="leadZip" pattern="[0-9]{5}" maxlength="5" required />
+        </div>
+        <div class="form-field full">
+          <label for="leadEmail">Email</label>
+          <input type="email" id="leadEmail" required />
+        </div>
+        <div class="form-field full">
+          <label for="leadProject">What are you looking to do?</label>
+          <select id="leadProject">
+            <option>Single-zone install (1 room)</option>
+            <option>Multi-zone install (2–5 rooms)</option>
+            <option>Whole-home replacement</option>
+            <option>Just getting quotes / comparing</option>
+          </select>
+        </div>
+        <div class="form-field full">
+          <button type="submit" class="btn btn-primary btn-block">Get My Free Quotes</button>
+          <p style="font-size:0.82rem; color:var(--color-muted); margin:10px 0 0; text-align:center;">
+            By submitting, you agree to be contacted by up to 3 local installers.
+          </p>
+        </div>
+      </div>
+      <div id="leadSuccess" style="display:none; margin-top:20px; padding:16px; background:#eef5f1; border-radius:8px; color:#065f46; text-align:center;">
+        ✓ Got it. You'll hear from local pros within 24 hours.
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ==========  FOOTER  ========== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px;">
+          <span class="logo-mark">M</span>
+          <span>Best DIY Mini Splits</span>
+        </div>
+        <p style="color:var(--color-text-soft); font-size:0.92rem; max-width:320px;">
+          Honest, homeowner-first guides to mini split sizing, installation, and shopping.
+        </p>
+      </div>
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="mini-split-sizing-calculator">BTU Sizing Calculator</a></li>
+          <li><a href="#quotes">Get Free Quotes</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="best-mini-splits">2026 Buyer's Guide</a></li>
+          <li><a href="diy-mini-split-installation">DIY Install Guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>About</h4>
+        <ul>
+          <li><a href="#">Our methodology</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2026 BestDIYMiniSplits.com · Independent, reader-supported.
+    </div>
+  </div>
+</footer>
+
+<script>
+function calculateBtu() {
+  const sqft = parseFloat(document.getElementById('sqft').value) || 0;
+  const ceiling = parseFloat(document.getElementById('ceiling').value);
+  const climate = document.getElementById('climate').value;
+  const insulation = parseFloat(document.getElementById('insulation').value);
+  const sun = parseFloat(document.getElementById('sun').value);
+  const occupants = parseInt(document.getElementById('occupants').value) || 0;
+  const roomtype = parseFloat(document.getElementById('roomtype').value);
+  const floor = parseFloat(document.getElementById('floor').value);
+
+  const climateRates = { hot: 25, warm: 22, mixed: 20, cool: 18, cold: 16 };
+  const heatingRates = { hot: 18, warm: 22, mixed: 30, cool: 40, cold: 55 };
+
+  const base = sqft * climateRates[climate];
+  const occupantAdd = Math.max(0, occupants - 2) * 600;
+  let cooling = base * ceiling * insulation * sun * floor;
+  cooling += occupantAdd + roomtype;
+  let heating = sqft * heatingRates[climate] * ceiling * insulation * floor;
+
+  const roundBtu = n => Math.round(n / 1000) * 1000;
+  cooling = roundBtu(cooling);
+  heating = roundBtu(heating);
+
+  const recommended = Math.max(cooling, heating);
+  const standardSizes = [6000, 9000, 12000, 18000, 24000, 30000, 36000, 42000, 48000, 60000];
+  let matched = standardSizes.find(s => s >= recommended) || recommended;
+
+  document.getElementById('btuNum').textContent = matched.toLocaleString();
+  document.getElementById('tonNum').textContent = (matched / 12000).toFixed(1);
+  document.getElementById('unitSize').textContent = matched.toLocaleString() + ' BTU';
+
+  const suggestions = {
+    6000: ['MrCool DIY 6k (single zone)', 'Pioneer 9k (closest value pick)'],
+    9000: ['MrCool DIY 9k', 'Pioneer WYS009', 'Senville LETO 9k', 'Mitsubishi MSZ-FS09NA'],
+    12000: ['MrCool DIY 12k', 'Pioneer WYS012', 'Senville LETO 12k', 'Daikin FTX12'],
+    18000: ['MrCool DIY 18k', 'Mitsubishi MSZ-FS18NA', 'Fujitsu 18RLS3H'],
+    24000: ['MrCool DIY 24k', 'Mitsubishi MSZ-GL24NA', 'Fujitsu 24RLS3H'],
+    30000: ['Pioneer 30k single-zone', 'MrCool Universal (ducted)'],
+    36000: ['Multi-zone 3-head (12+12+12)', 'MrCool Universal 36k'],
+    42000: ['Multi-zone 4-head', 'MrCool Universal 48k (sized up)'],
+    48000: ['Multi-zone 4-5 head', 'MrCool Universal 48k'],
+    60000: ['Multi-zone 5 head (max)', 'Two separate systems recommended']
+  };
+  const list = document.getElementById('unitList');
+  list.innerHTML = (suggestions[matched] || ['Contact a pro for custom sizing']).map(s => `<li>${s}</li>`).join('');
+
+  const heatNote = document.getElementById('heatNote');
+  const coolTon = (cooling/12000).toFixed(1);
+  const heatTon = (heating/12000).toFixed(1);
+  heatNote.innerHTML = `Your cooling load is <strong>${cooling.toLocaleString()} BTU</strong> (${coolTon} ton). ` +
+                       `Your heating load is <strong>${heating.toLocaleString()} BTU</strong> (${heatTon} ton). ` +
+                       (heating > cooling
+                          ? `Heating is the driver — look for a <strong>hyper-heat</strong> model rated for your climate.`
+                          : `Cooling is the driver — a standard heat pump mini split will be comfortable year-round.`);
+
+  document.getElementById('breakdown').innerHTML = `
+    <div class="breakdown-row"><span>Base (${sqft} sq ft × ${climateRates[climate]} BTU/ft²)</span><span>${Math.round(sqft * climateRates[climate]).toLocaleString()}</span></div>
+    <div class="breakdown-row"><span>× ceiling height adjustment</span><span>${ceiling.toFixed(2)}×</span></div>
+    <div class="breakdown-row"><span>× insulation adjustment</span><span>${insulation.toFixed(2)}×</span></div>
+    <div class="breakdown-row"><span>× sun exposure adjustment</span><span>${sun.toFixed(2)}×</span></div>
+    <div class="breakdown-row"><span>× floor adjustment</span><span>${floor.toFixed(2)}×</span></div>
+    <div class="breakdown-row"><span>+ extra occupants</span><span>+${occupantAdd.toLocaleString()}</span></div>
+    ${roomtype ? `<div class="breakdown-row"><span>+ room-type load</span><span>+${roomtype.toLocaleString()}</span></div>` : ''}
+    <div class="breakdown-row total"><span>Recommended (rounded up to standard size)</span><span>${matched.toLocaleString()} BTU</span></div>
+  `;
+
+  const result = document.getElementById('result');
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function submitLead() {
+  document.getElementById('leadForm').querySelector('.form-grid').style.display = 'none';
+  document.getElementById('leadSuccess').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
