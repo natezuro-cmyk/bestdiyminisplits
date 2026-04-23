@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+  "name": "bdms-api",
+  "main": "worker.js",
+  "compatibility_date": "2025-01-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bdms-subscribers",
+      "database_id": "4fee308d-fd40-49a4-a2cc-9c993160b68e"
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "bestdiyminisplits.com/api/*",
+      "zone_name": "bestdiyminisplits.com"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

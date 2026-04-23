@@ -1,0 +1,24 @@
+{
+  "name": "bestdiyminisplits",
+  "version": "1.0.0",
+  "description": "| File | Purpose | |---|---| | `index.html` | Homepage — hero, embedded calculator, value props, lead form, FAQ | | `mini-split-sizing-calculator` | Dedicated BTU sizing calculator landing page (main SEO target) | | `best-mini-splits` | 2026 pillar article — brand comparison | | `diy-mini-split-installation` | DIY install walkthrough — supporting article | | `styles.css` | Shared design system | | `robots.txt` | Search engine crawl rules | | `sitemap.xml` | URL list for search engines | | `404.html` | Not-found page |",
+  "main": "calculator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/natezuro-cmyk/bestdiyminisplits.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/natezuro-cmyk/bestdiyminisplits/issues"
+  },
+  "homepage": "https://github.com/natezuro-cmyk/bestdiyminisplits#readme",
+  "devDependencies": {
+    "wrangler": "^4.84.1"
+  }
+}
