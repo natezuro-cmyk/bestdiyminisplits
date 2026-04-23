@@ -1,74 +1,84 @@
-# BestDIYMiniSplits.com — Starter Site
+# Best DIY Mini Splits
 
-## What's in this folder
+Live at **[bestdiyminisplits.com](https://bestdiyminisplits.com)**.
 
-| File | Purpose |
+Static HTML site served from Cloudflare Workers Static Assets, with a
+tiny companion API Worker that handles newsletter signups and pageview
+analytics on Cloudflare D1. Zero third-party dependencies for the
+runtime.
+
+## Architecture
+
+| Piece | Where |
 |---|---|
-| `index.html` | Homepage — hero, embedded calculator, value props, lead form, FAQ |
-| `mini-split-sizing-calculator` | Dedicated BTU sizing calculator landing page (main SEO target) |
-| `best-mini-splits` | 2026 pillar article — brand comparison |
-| `diy-mini-split-installation` | DIY install walkthrough — supporting article |
-| `styles.css` | Shared design system |
-| `robots.txt` | Search engine crawl rules |
-| `sitemap.xml` | URL list for search engines |
-| `404.html` | Not-found page |
+| Static site (homepage, guides, calculator, checklist) | Cloudflare Worker `bestdiyminisplits` (Workers Static Assets), config in `wrangler.jsonc` |
+| Subscribe + pageview API (`/api/*`) | Cloudflare Worker `bdms-api`, source in `api/`, route `bestdiyminisplits.com/api/*` |
+| Database | Cloudflare D1 `bdms-subscribers` — tables: `subscribers`, `pageviews` |
+| Email forwarding (`hello@`, `press@`, `privacy@`) | Cloudflare Email Routing catch-all → natezuro@gmail.com |
+| Domain | Cloudflare Registrar, proxied |
 
-## How to deploy
+## Common operations
 
-This is plain static HTML/CSS — host anywhere that serves static files.
+Install wrangler once: `npm install` (uses Cloudflare auth stored via `npx wrangler login`).
 
-### Easiest (recommended for a new site)
+### See subscribers
 
-**Cloudflare Pages** — free, fast, includes SSL:
-1. Upload this folder to a new GitHub repo
-2. Connect the repo at [pages.cloudflare.com](https://pages.cloudflare.com)
-3. Point your domain (bestdiyminisplits.com) at Cloudflare Pages
-4. Done
+```bash
+npm run subs          # latest 100
+npm run subs:count    # total count
+npm run subs:csv      # export to ./subscribers.sql
+```
 
-Alternatives with the same workflow: **Netlify**, **Vercel**, **GitHub Pages**.
+### See pageview analytics
 
-### If you want Wordpress eventually
+```bash
+npm run views          # total pageviews ever
+npm run views:today    # pageviews today
+npm run views:top      # top 20 pages in the last 30 days
+npm run views:referrers # top 20 referrers in the last 30 days
+```
 
-You can start static, and when you're ready for a blog CMS, port the calculator to a Wordpress shortcode. The calculator JS is self-contained inside `mini-split-sizing-calculator` — easy to drop into a custom HTML block.
+### Deploy changes
 
-## Hooking up the lead form
+Every `git push` to `main` triggers an automatic Cloudflare build that
+redeploys the static site. The API Worker (in `api/`) deploys manually
+when its code changes:
 
-The lead form currently shows a success message but doesn't send anywhere. Plug it into one of these (no code changes required in most cases):
+```bash
+npm run deploy:api     # deploy api/ worker
+npm run deploy:site    # force-redeploy static site (rarely needed)
+```
 
-- **Formspree** — add `action="https://formspree.io/f/YOUR_ID"` to the `<form>` tag
-- **Zapier webhook** — point to a Zap that emails/CRMs the lead
-- **Netlify Forms** — add `data-netlify="true"` to the form
-- **Custom backend** — POST the form to your own endpoint
+### Database schema changes
 
-## Next steps for SEO (what you should do after deploy)
+Apply a new SQL file to D1:
 
-1. **Submit to Google Search Console** — add `bestdiyminisplits.com`, verify ownership, submit the sitemap
-2. **Submit to Bing Webmaster Tools** — same
-3. **Set up Google Analytics 4** — add the tracking snippet before `</head>` in each HTML file
-4. **Build backlinks** — share the calculator on:
-   - Reddit: r/hvacadvice, r/homeimprovement, r/diy
-   - HVAC forums: HVAC-Talk.com
-   - Home forums: InternachI, BobVila, HomeDepot Community
-   - The BTU calculator is inherently linkable — people cite tools.
-5. **Add more articles** — each with its own URL:
-   - "Mini split vs central air cost comparison"
-   - "MrCool DIY review"
-   - "Mitsubishi vs Daikin mini split"
-   - "Mini split installation cost by state"
-   - "Best mini split for [400, 500, 600, 800, 1000] sq ft"
-6. **Schema markup** — already present on every page (FAQ, HowTo, Article, BreadcrumbList, WebApplication)
+```bash
+npx wrangler d1 execute bdms-subscribers --file=db/your-file.sql --remote
+```
 
-## Monetization hookup (for later)
+## Repo layout
 
-Since you want to eventually sell HVAC-seller leads, the lead form on every page captures what you need. When you're ready:
+```
+/                         static site root (HTML, CSS, calculator.js, og image)
+/api/                     subscribe + pageview Worker (fetch handler + D1)
+/db/                      SQL schema files
+/wrangler.jsonc           main site Worker config
+/.assetsignore            excludes api/, db/, node_modules/, tooling from uploaded assets
+```
 
-- Sign up for a lead-gen platform like **Networx**, **Modernize**, or **HomeAdvisor** and resell leads
-- Or build direct relationships with local HVAC pros in high-value zips and sell exclusivity per zip
-- Average mini split lead value in 2026: $35–$120 per lead depending on zip code and project size
+## Pre-launch checklist (status)
 
-## Things to customize before launch
-
-- Replace "Our methodology / Contact / Privacy" footer links with real pages
-- Add your email/phone to the contact page
-- Swap the SVG logo `M` for a real logo image when you have one
-- Hook the lead form up to a real submission endpoint
+- [x] Custom domain at apex
+- [x] Static site live
+- [x] Subscribe API + D1 working
+- [x] Email routing (catch-all `*@bestdiyminisplits.com`)
+- [x] Social/OG image + metadata on every page
+- [x] Affiliate disclosure on buyer's guide and install guide
+- [x] Privacy policy finalized (no placeholder provider text)
+- [x] `/checklist` printable page (the promised subscriber PDF)
+- [x] Self-hosted pageview analytics (no GA4, no cookies)
+- [ ] Google Search Console verification + sitemap submission
+- [ ] `/about.html` personalized with real name, photo, credentials
+- [ ] Affiliate program signups (Amazon, Home Depot, Lowe's) + real affiliate URLs in buyer's guide
+- [ ] Smoke test on an actual phone

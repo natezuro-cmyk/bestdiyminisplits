@@ -19,16 +19,10 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://bestdiyminisplits.com/og-default.png" />
 
-  <!-- ANALYTICS — uncomment and replace G-XXXXXXXXXX with your Google Analytics 4 Measurement ID -->
-  <!--
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <!-- Self-hosted pageview analytics (Cloudflare D1) -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
+  (function(){if(navigator.doNotTrack=="1")return;if(/bot|crawler|spider|headless/i.test(navigator.userAgent))return;fetch("/api/pageview",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:location.pathname,referrer:document.referrer||""}),keepalive:true}).catch(function(){});})();
   </script>
-  -->
 
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='2' width='28' height='28' fill='none' stroke='%231a1814' stroke-width='2'/><rect x='7' y='8' width='18' height='2' fill='%231a1814'/><rect x='7' y='13' width='18' height='2' fill='%231a1814'/><rect x='7' y='18' width='18' height='2' fill='%231a1814'/><rect x='30' y='14' width='2' height='4' fill='%23b44019'/></svg>" />
@@ -317,7 +311,7 @@
         We'll never sell your email. Just occasional DIY tips, deals, and new guides.
       </p>
       <div id="newsletterSuccess" style="display:none; margin-top:20px; padding:16px; background:#eef5f1; border-radius:8px; color:#065f46; text-align:center;">
-        ✓ Check your inbox — the checklist is on its way.
+        ✓ You✓ Check your inbox — the checklist is on its way.rsquo;re on the list. <a href="/checklist" style="color:inherit; text-decoration: underline;">View the checklist now →</a>
       </div>
     </form>
   </div>

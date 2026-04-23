@@ -41,6 +41,35 @@ export default {
       return new Response(null, { status: 204, headers: cors });
     }
 
+    if (url.pathname === '/api/pageview' && request.method === 'POST') {
+      try {
+        const body = await request.json();
+        const path = String(body.path || '').slice(0, 500);
+        const ref  = String(body.referrer || '').slice(0, 500);
+        const ua   = (request.headers.get('User-Agent') || '').slice(0, 500);
+        const country = (request.cf && request.cf.country) || '';
+
+        // Drop obvious bots — don't want their pageviews in the stats
+        if (/bot|crawler|spider|headless|preview|scraper/i.test(ua)) {
+          return json({ ok: true, skipped: 'bot' }, 200, cors);
+        }
+        if (!path || !path.startsWith('/')) {
+          return json({ ok: false, error: 'invalid_path' }, 400, cors);
+        }
+
+        await env.DB.prepare(
+          'INSERT INTO pageviews (viewed_at, path, referrer, country, user_agent) VALUES (?, ?, ?, ?, ?)'
+        )
+          .bind(Math.floor(Date.now() / 1000), path, ref, country, ua)
+          .run();
+
+        return json({ ok: true }, 200, cors);
+      } catch (err) {
+        console.error('pageview insert failed', err);
+        return json({ ok: false, error: 'server_error' }, 500, cors);
+      }
+    }
+
     if (url.pathname === '/api/subscribe' && request.method === 'POST') {
       let body;
       try {

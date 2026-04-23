@@ -1,23 +1,24 @@
 {
   "name": "bestdiyminisplits",
   "version": "1.0.0",
-  "description": "| File | Purpose | |---|---| | `index.html` | Homepage — hero, embedded calculator, value props, lead form, FAQ | | `mini-split-sizing-calculator` | Dedicated BTU sizing calculator landing page (main SEO target) | | `best-mini-splits` | 2026 pillar article — brand comparison | | `diy-mini-split-installation` | DIY install walkthrough — supporting article | | `styles.css` | Shared design system | | `robots.txt` | Search engine crawl rules | | `sitemap.xml` | URL list for search engines | | `404.html` | Not-found page |",
-  "main": "calculator.js",
+  "description": "BestDIYMiniSplits.com — static site with self-hosted subscribe API on Cloudflare Workers + D1.",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy:site": "wrangler deploy",
+    "deploy:api": "cd api && wrangler deploy",
+    "subs": "wrangler d1 execute bdms-subscribers --remote --command=\"SELECT id, email, datetime(created_at,'unixepoch') AS joined, source FROM subscribers ORDER BY created_at DESC LIMIT 100\"",
+    "subs:count": "wrangler d1 execute bdms-subscribers --remote --command=\"SELECT COUNT(*) AS total FROM subscribers\"",
+    "subs:csv": "wrangler d1 export bdms-subscribers --remote --table=subscribers --output=./subscribers.sql && echo 'Exported to ./subscribers.sql'",
+    "views": "wrangler d1 execute bdms-subscribers --remote --command=\"SELECT COUNT(*) AS total FROM pageviews\"",
+    "views:today": "wrangler d1 execute bdms-subscribers --remote --command=\"SELECT COUNT(*) AS today FROM pageviews WHERE viewed_at >= strftime('%s','now','start of day')\"",
+    "views:top": "wrangler d1 execute bdms-subscribers --remote --command=\"SELECT path, COUNT(*) AS views FROM pageviews WHERE viewed_at >= strftime('%s','now','-30 days') GROUP BY path ORDER BY views DESC LIMIT 20\"",
+    "views:referrers": "wrangler d1 execute bdms-subscribers --remote --command=\"SELECT referrer, COUNT(*) AS hits FROM pageviews WHERE viewed_at >= strftime('%s','now','-30 days') AND referrer != '' GROUP BY referrer ORDER BY hits DESC LIMIT 20\""
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/natezuro-cmyk/bestdiyminisplits.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/natezuro-cmyk/bestdiyminisplits/issues"
-  },
-  "homepage": "https://github.com/natezuro-cmyk/bestdiyminisplits#readme",
+  "license": "UNLICENSED",
   "devDependencies": {
     "wrangler": "^4.84.1"
   }
