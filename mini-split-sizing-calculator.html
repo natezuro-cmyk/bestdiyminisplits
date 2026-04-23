@@ -40,6 +40,8 @@
 </head>
 <body>
 
+<a href="#main" class="skip-link">Skip to main content</a>
+
 <header class="site-header">
   <div class="nav">
     <a href="/" class="logo">
@@ -50,12 +52,13 @@
       <li><a href="mini-split-sizing-calculator">BTU Calculator</a></li>
       <li><a href="best-mini-splits">Buyer's Guide</a></li>
       <li><a href="diy-mini-split-installation">Install Guide</a></li>
-      <li><a href="#quotes" class="nav-cta">Get Quotes</a></li>
+      <li><a href="#newsletter" class="nav-cta">Free Checklist</a></li>
     </ul>
     <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
   </div>
 </header>
 
+<main id="main">
 <section style="padding-top: 48px;">
   <div class="container container-narrow">
     <p style="font-size:0.88rem; color:var(--color-muted); margin-bottom:8px;">
@@ -160,21 +163,31 @@
           </p>
 
           <div class="result-two-col">
-            <div class="unit-suggestions">
-              <h4>Common units that match</h4>
-              <ul id="unitList"></ul>
+            <div class="unit-suggestions diy-picks">
+              <h4><span class="pick-badge pick-badge-diy">🔧 Complete DIY</span></h4>
+              <p class="pick-sub">No HVAC tech needed · Pre-charged lines</p>
+              <ul id="diyList"></ul>
             </div>
-            <div class="unit-suggestions">
-              <h4>Heating vs cooling</h4>
-              <p style="margin:0; font-size:0.92rem; color:var(--color-text-soft);" id="heatNote"></p>
+            <div class="unit-suggestions pro-picks">
+              <h4><span class="pick-badge pick-badge-pro">👷 Pro install required</span></h4>
+              <p class="pick-sub">Vacuum pump + EPA cert needed</p>
+              <ul id="proList"></ul>
             </div>
           </div>
 
-          <div class="breakdown" id="breakdown"></div>
+          <div class="unit-suggestions" style="margin-top:18px;">
+            <h4>Heating vs cooling</h4>
+            <p style="margin:0; font-size:0.92rem; color:var(--color-text-soft);" id="heatNote"></p>
+          </div>
+
+          <details class="breakdown-disclosure">
+            <summary>See the math</summary>
+            <div class="breakdown" id="breakdown"></div>
+          </details>
 
           <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
-            <a href="#quotes" class="btn btn-primary">Get Free Quotes for This Size →</a>
-            <a href="best-mini-splits" class="btn btn-outline">See Best Units at This Size</a>
+            <a href="best-mini-splits" class="btn btn-primary">See Best DIY Units at This Size →</a>
+            <a href="#newsletter" class="btn btn-outline">Get the DIY Buying Checklist</a>
           </div>
         </div>
 
@@ -237,58 +250,41 @@
     <h3>What to do after you have your BTU number</h3>
     <p>Once you have the recommended capacity:</p>
     <ol>
-      <li>Read our <a href="best-mini-splits">2026 Buyer's Guide</a> to pick a brand and efficiency tier.</li>
-      <li>If you're in a cold climate, make sure the model you pick has <strong>rated capacity at 5°F or lower</strong> — not just a marketing "works in cold weather" claim.</li>
-      <li>Decide DIY vs pro install. Our <a href="diy-mini-split-installation">DIY install guide</a> walks through whether you're a good candidate.</li>
-      <li><a href="#quotes">Get a few installer quotes</a> to sanity-check DIY savings against real-world pro pricing in your area.</li>
+      <li>Read our <a href="best-mini-splits">2026 Buyer's Guide</a> to pick a brand — we split the field into Complete DIY (no HVAC tech needed) and Pro-install required.</li>
+      <li>If you're in a cold climate, make sure the model has <strong>rated capacity at 5°F or lower</strong> — not just marketing copy that says "works in cold weather." MrCool HyperHeat and Cooper &amp; Hunter Sophia are the two DIY lines actually rated below freezing.</li>
+      <li>Decide DIY vs pro install. Our <a href="diy-mini-split-installation">DIY install guide</a> walks through whether you're a good candidate (spoiler: if you've installed a ceiling fan and a 240V outlet, you probably are).</li>
+      <li><a href="#newsletter">Grab the free DIY buying checklist</a> — it's the one-page spec-sheet cheat sheet to double-check any unit before you buy.</li>
     </ol>
   </div>
 </section>
 
-<!-- ==========  LEAD CAPTURE  ========== -->
-<section id="quotes" class="lead-band">
+<!-- ==========  DIY NEWSLETTER SIGNUP  ========== -->
+<section id="newsletter" class="lead-band">
   <div class="container">
     <div class="section-head">
       <span class="eyebrow" style="color:#8ed7b9;">Now That You Have A Size</span>
-      <h2>Get up to 3 installer quotes for your exact BTU size</h2>
-      <p>Local, vetted HVAC pros who specialize in mini splits. Free, no spam, no obligation.</p>
+      <h2>Get the free DIY buying checklist</h2>
+      <p>One page: the 7 spec-sheet questions to ask before you hit "buy," a cold-climate rating sanity check, and the DIY pre-flight install list. Delivered instantly. No spam — unsubscribe anytime.</p>
     </div>
-    <form class="lead-form" id="leadForm" onsubmit="event.preventDefault(); submitLead();">
-      <div class="form-grid">
+    <form class="lead-form lead-form-compact" id="newsletterForm" onsubmit="event.preventDefault(); submitNewsletter();">
+      <div class="newsletter-row">
         <div class="form-field">
-          <label for="leadName">Your name</label>
-          <input type="text" id="leadName" required />
+          <label for="newsletterEmail" class="sr-only">Email address</label>
+          <input type="email" id="newsletterEmail" placeholder="you@example.com" required />
         </div>
-        <div class="form-field">
-          <label for="leadZip">Zip code</label>
-          <input type="text" id="leadZip" pattern="[0-9]{5}" maxlength="5" required />
-        </div>
-        <div class="form-field full">
-          <label for="leadEmail">Email</label>
-          <input type="email" id="leadEmail" required />
-        </div>
-        <div class="form-field full">
-          <label for="leadProject">What are you looking to do?</label>
-          <select id="leadProject">
-            <option>Single-zone install (1 room)</option>
-            <option>Multi-zone install (2–5 rooms)</option>
-            <option>Whole-home replacement</option>
-            <option>Just getting quotes / comparing</option>
-          </select>
-        </div>
-        <div class="form-field full">
-          <button type="submit" class="btn btn-primary btn-block">Get My Free Quotes</button>
-          <p style="font-size:0.82rem; color:var(--color-muted); margin:10px 0 0; text-align:center;">
-            By submitting, you agree to be contacted by up to 3 local installers.
-          </p>
-        </div>
+        <button type="submit" class="btn btn-primary">Send Me the Checklist →</button>
       </div>
-      <div id="leadSuccess" style="display:none; margin-top:20px; padding:16px; background:#eef5f1; border-radius:8px; color:#065f46; text-align:center;">
-        ✓ Got it. You'll hear from local pros within 24 hours.
+      <p style="font-size:0.82rem; color:var(--color-muted); margin:14px 0 0; text-align:center;">
+        We'll never sell your email. Just occasional DIY tips, deals, and new guides.
+      </p>
+      <div id="newsletterSuccess" style="display:none; margin-top:20px; padding:16px; background:#eef5f1; border-radius:8px; color:#065f46; text-align:center;">
+        ✓ Check your inbox — the checklist is on its way.
       </div>
     </form>
   </div>
 </section>
+
+</main>
 
 <!-- ==========  FOOTER  ========== -->
 <footer class="site-footer">
@@ -307,7 +303,7 @@
         <h4>Tools</h4>
         <ul>
           <li><a href="mini-split-sizing-calculator">BTU Sizing Calculator</a></li>
-          <li><a href="#quotes">Get Free Quotes</a></li>
+          <li><a href="#newsletter">Free DIY Checklist</a></li>
         </ul>
       </div>
       <div>
@@ -320,9 +316,9 @@
       <div>
         <h4>About</h4>
         <ul>
-          <li><a href="#">Our methodology</a></li>
-          <li><a href="#">Contact</a></li>
-          <li><a href="#">Privacy</a></li>
+          <li><a href="methodology">Our methodology</a></li>
+          <li><a href="contact">Contact</a></li>
+          <li><a href="privacy">Privacy</a></li>
         </ul>
       </div>
     </div>
@@ -364,20 +360,33 @@ function calculateBtu() {
   document.getElementById('tonNum').textContent = (matched / 12000).toFixed(1);
   document.getElementById('unitSize').textContent = matched.toLocaleString() + ' BTU';
 
+  // Two-tier suggestions: Complete DIY (pre-charged) vs Pro-install required
+  // Alphabetical within each tier — no single brand at the top.
   const suggestions = {
-    6000: ['MrCool DIY 6k (single zone)', 'Pioneer 9k (closest value pick)'],
-    9000: ['MrCool DIY 9k', 'Pioneer WYS009', 'Senville LETO 9k', 'Mitsubishi MSZ-FS09NA'],
-    12000: ['MrCool DIY 12k', 'Pioneer WYS012', 'Senville LETO 12k', 'Daikin FTX12'],
-    18000: ['MrCool DIY 18k', 'Mitsubishi MSZ-FS18NA', 'Fujitsu 18RLS3H'],
-    24000: ['MrCool DIY 24k', 'Mitsubishi MSZ-GL24NA', 'Fujitsu 24RLS3H'],
-    30000: ['Pioneer 30k single-zone', 'MrCool Universal (ducted)'],
-    36000: ['Multi-zone 3-head (12+12+12)', 'MrCool Universal 36k'],
-    42000: ['Multi-zone 4-head', 'MrCool Universal 48k (sized up)'],
-    48000: ['Multi-zone 4-5 head', 'MrCool Universal 48k'],
-    60000: ['Multi-zone 5 head (max)', 'Two separate systems recommended']
+    6000:  { diy: ['Klimaire DIY 6k', 'Perfect Aire ProDirect 6k'],
+             pro: ['Mitsubishi MSZ-FS06NA', 'Pioneer WYS006'] },
+    9000:  { diy: ['Klimaire DIY 9k', 'MrCool DIY 9k', 'Perfect Aire ProDirect 9k'],
+             pro: ['Daikin 19-Series 9k', 'Fujitsu ASU9RL', 'Mitsubishi MSZ-FS09NA'] },
+    12000: { diy: ['Della DIY 12k', 'Klimaire DIY 12k', 'MrCool DIY 12k', 'Perfect Aire ProDirect 12k'],
+             pro: ['Daikin FTXS12', 'Fujitsu 12RLS3H', 'Mitsubishi MSZ-FS12NA', 'Senville LETO 12k'] },
+    18000: { diy: ['Klimaire DIY 18k', 'MrCool DIY 18k', 'Perfect Aire ProDirect 18k'],
+             pro: ['Daikin 18-Series', 'Fujitsu 18RLS3H', 'Mitsubishi MSZ-GL18NA'] },
+    24000: { diy: ['Della DIY 24k', 'MrCool DIY 24k'],
+             pro: ['Daikin 24-Series', 'Fujitsu 24RLS3H', 'Mitsubishi MSZ-GL24NA'] },
+    30000: { diy: ['Cooper & Hunter DIY multi-zone', 'MrCool Universal 30k (ducted)'],
+             pro: ['Daikin multi-zone', 'Mitsubishi multi-zone', 'Pioneer 30k'] },
+    36000: { diy: ['Cooper & Hunter DIY 3-head multi-zone', 'MrCool DIY 4-zone (9+9+9+9)', 'MrCool Universal 36k'],
+             pro: ['Daikin 3-zone', 'Fujitsu 3-zone', 'Mitsubishi multi-zone 36k'] },
+    42000: { diy: ['MrCool DIY 4-zone (12+9+9+12)', 'MrCool Universal 48k (sized up)'],
+             pro: ['Daikin 4-zone', 'Mitsubishi multi-zone 42k'] },
+    48000: { diy: ['MrCool DIY 5-zone (max)', 'MrCool Universal 48k'],
+             pro: ['Daikin 4–5 zone', 'Mitsubishi 4–5 zone'] },
+    60000: { diy: ['Two separate DIY systems recommended'],
+             pro: ['Pro multi-zone 5-head + supplemental', 'Consider ducted Universal + auxiliary'] }
   };
-  const list = document.getElementById('unitList');
-  list.innerHTML = (suggestions[matched] || ['Contact a pro for custom sizing']).map(s => `<li>${s}</li>`).join('');
+  const pick = suggestions[matched] || { diy: ['Contact us for custom sizing'], pro: ['Contact a pro for custom sizing'] };
+  document.getElementById('diyList').innerHTML = pick.diy.map(s => `<li>${s}</li>`).join('');
+  document.getElementById('proList').innerHTML = pick.pro.map(s => `<li>${s}</li>`).join('');
 
   const heatNote = document.getElementById('heatNote');
   const coolTon = (cooling/12000).toFixed(1);
@@ -404,9 +413,10 @@ function calculateBtu() {
   result.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function submitLead() {
-  document.getElementById('leadForm').querySelector('.form-grid').style.display = 'none';
-  document.getElementById('leadSuccess').style.display = 'block';
+function submitNewsletter() {
+  // Placeholder — hook into your email service (ConvertKit, Mailchimp, Formspree, etc.)
+  document.getElementById('newsletterForm').querySelector('.newsletter-row').style.display = 'none';
+  document.getElementById('newsletterSuccess').style.display = 'block';
 }
 </script>
 
