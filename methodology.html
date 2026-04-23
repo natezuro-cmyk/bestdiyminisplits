@@ -12,8 +12,26 @@
   <meta property="og:title" content="Our Methodology — Best DIY Mini Splits" />
   <meta property="og:description" content="How we evaluate and rank mini splits. Data sources, conflicts of interest, update cadence." />
 
+  <!-- Social / Open Graph image -->
+  <meta property="og:image" content="https://bestdiyminisplits.com/og-default.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://bestdiyminisplits.com/og-default.png" />
+
+  <!-- ANALYTICS — uncomment and replace G-XXXXXXXXXX with your Google Analytics 4 Measurement ID -->
+  <!--
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+  -->
+
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a7c5a'/><text x='16' y='22' font-family='Arial' font-size='18' font-weight='700' text-anchor='middle' fill='white'>M</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='2' width='28' height='28' fill='none' stroke='%231a1814' stroke-width='2'/><rect x='7' y='8' width='18' height='2' fill='%231a1814'/><rect x='7' y='13' width='18' height='2' fill='%231a1814'/><rect x='7' y='18' width='18' height='2' fill='%231a1814'/><rect x='30' y='14' width='2' height='4' fill='%23b44019'/></svg>" />
 </head>
 <body>
 
@@ -21,26 +39,24 @@
 
 <header class="site-header">
   <div class="nav">
-    <a href="/" class="logo"><span class="logo-mark">M</span><span>Best DIY Mini Splits</span></a>
+    <a href="/" class="logo"><span class="logo-mark" aria-hidden="true"></span><span>Best DIY Mini Splits</span></a>
     <ul class="nav-links" id="navLinks">
-      <li><a href="mini-split-sizing-calculator">BTU Calculator</a></li>
+      <li><a href="mini-split-sizing-calculator">Calculator</a></li>
       <li><a href="best-mini-splits">Buyer's Guide</a></li>
-      <li><a href="diy-mini-split-installation">Install Guide</a></li>
-      <li><a href="/#newsletter" class="nav-cta">Free Checklist</a></li>
+      <li><a href="diy-mini-split-installation">Install</a></li>
+      <li><a href="/#newsletter" class="nav-cta">Get the Checklist</a></li>
     </ul>
     <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
   </div>
 </header>
 
 <main id="main">
-<section style="padding-top: 48px;">
+<section class="article-top">
   <div class="container container-narrow prose">
-    <p style="font-size:0.88rem; color:var(--color-muted); margin-bottom:8px;">
-      <a href="/" style="color:var(--color-muted);">Home</a> → Methodology
-    </p>
-    <span class="eyebrow">Last updated April 2026</span>
+    <p class="crumbs"><a href="/">Home</a> → Methodology</p>
+    <span class="kicker">Last updated April 2026</span>
     <h1>How we evaluate mini splits</h1>
-    <p style="font-size:1.1rem; color:var(--color-text-soft);">
+    <p class="lede">
       Straight answer: we read manufacturer spec sheets, AHRI certification filings, and real-world owner reports. We don't take money to rank units. Here's the longer version.
     </p>
 
@@ -90,14 +106,17 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <div class="logo" style="margin-bottom:14px;"><span class="logo-mark">M</span><span>Best DIY Mini Splits</span></div>
-        <p style="color:var(--color-text-soft); font-size:0.92rem; max-width:320px;">Honest, homeowner-first guides. No sponsored rankings.</p>
+        <a href="/" class="logo" style="margin-bottom:18px;"><span class="logo-mark" aria-hidden="true"></span><span>Best DIY Mini Splits</span></a>
+        <p style="color:var(--paper-alt); font-size:0.98rem; max-width:320px; margin-top:18px; line-height:1.55;">A homeowner-first field manual for ductless mini splits. Honest sizing, honest brands, honest install advice.</p>
       </div>
       <div><h4>Tools</h4><ul><li><a href="mini-split-sizing-calculator">BTU Sizing Calculator</a></li><li><a href="/#newsletter">Free DIY Checklist</a></li></ul></div>
       <div><h4>Guides</h4><ul><li><a href="best-mini-splits">2026 Buyer's Guide</a></li><li><a href="diy-mini-split-installation">DIY Install Guide</a></li></ul></div>
-      <div><h4>About</h4><ul><li><a href="methodology">Our methodology</a></li><li><a href="contact">Contact</a></li><li><a href="privacy">Privacy</a></li></ul></div>
+      <div><h4>About</h4><ul><li><a href="about">About the editor</a></li><li><a href="methodology">Our methodology</a></li><li><a href="contact">Contact</a></li><li><a href="privacy">Privacy</a></li></ul></div>
     </div>
-    <div class="footer-bottom">© 2026 BestDIYMiniSplits.com · Independent, reader-supported.</div>
+    <div class="footer-bottom">
+      <span>© 2026 BESTDIYMINISPLITS.COM</span>
+      <span>Independent <span class="dot">·</span> Reader-supported <span class="dot">·</span> No sponsored rankings</span>
+    </div>
   </div>
 </footer>
 

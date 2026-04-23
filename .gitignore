@@ -1,0 +1,17 @@
+# Superpowers brainstorm / visual companion session data
+.superpowers/
+
+# macOS
+.DS_Store
+
+# Editor / OS
+*.swp
+*~
+.vscode/
+.idea/
+
+# Node / tooling (future-proof)
+node_modules/
+npm-debug.log
+.env
+.env.local
