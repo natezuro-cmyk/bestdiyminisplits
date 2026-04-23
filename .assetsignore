@@ -1,0 +1,24 @@
+# Files in the repo that should NOT be uploaded as static assets
+
+# Worker API source + its wrangler config
+api/
+
+# D1 schema files
+db/
+
+# Node / tooling
+node_modules/
+package.json
+package-lock.json
+
+# Wrangler config itself (not a user-facing asset)
+wrangler.jsonc
+.assetsignore
+
+# Dev / meta
+.git/
+.gitignore
+.github/
+.superpowers/
+*.md
+*.log
