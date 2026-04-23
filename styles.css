@@ -57,6 +57,7 @@ body {
   line-height: 1.62;
   color: var(--ink);
   background: var(--paper);
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   /* Subtle paper grain */
   background-image:
@@ -597,8 +598,16 @@ section.tight { padding: 64px 0; }
   font-size: 0.98rem;
   color: var(--ink);
   border-radius: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   transition: background 0.12s, border-color 0.12s;
 }
+/* Mobile safety: nothing in the calculator should ever force horizontal scroll */
+.calc-wrap, .calc-body, .calc-layout, .calc-layout > *,
+.form-grid, .form-field { min-width: 0; }
+.calc-wrap { max-width: 100%; overflow-x: clip; }
 .form-field input:focus,
 .form-field select:focus {
   outline: none;
