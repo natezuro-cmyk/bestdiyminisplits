@@ -719,6 +719,10 @@ section.tight { padding: 64px 0; }
   gap: 14px;
   flex-wrap: wrap;
 }
+@media (max-width: 560px) {
+  .result-ctas { flex-direction: column; align-items: stretch; }
+  .result-ctas .btn { width: 100%; white-space: normal; padding: 14px 16px; }
+}
 .result-label {
   font-family: var(--font-mono);
   font-size: 0.72rem;
